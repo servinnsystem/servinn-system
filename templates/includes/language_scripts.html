@@ -1,0 +1,9 @@
+{% load static %}
+<script src="{% static 'js/language_catalog.js' %}" defer></script>
+<script src="{% static 'js/landing_languages.js' %}" defer></script>
+<script src="{% static 'js/language_controller.js' %}" defer></script>
+
+{% load moderation_tags %}
+{% moderation_rules as content_rules %}
+{{ content_rules|json_script:"servinn-content-rules" }}
+<script src="{% static 'js/content_moderation.js' %}" defer></script>

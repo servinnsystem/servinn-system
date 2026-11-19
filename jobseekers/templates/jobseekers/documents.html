@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Documents & verification | SERVINN</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eff4f0;color:#203e34;font:14px/1.6 'Segoe UI',sans-serif}a{color:inherit}header{background:white;padding:20px 5%;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #dde6df}.brand{display:flex;align-items:center;text-decoration:none;font-size:24px;font-weight:800}nav{display:flex;gap:24px}main{max-width:1180px;margin:32px auto;padding:0 24px 50px}h1{font-size:34px;letter-spacing:-1px;margin:12px 0 6px}h2{font-size:18px;margin:0 0 10px}.muted,small{color:#667c70}.eyebrow{letter-spacing:2px;font-size:11px;text-transform:uppercase}.intro{margin-bottom:26px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}.card{background:white;border:1px solid #dfe8e1;border-radius:16px;padding:24px;margin-bottom:18px}.document-head{display:flex;justify-content:space-between;align-items:center;gap:16px}.tag{font-size:11px;background:#edf3ef;padding:4px 10px;border-radius:20px}.file-area{margin-top:16px;background:#f8faf8;border:1px dashed #acbfb0;border-radius:10px;padding:18px}input[type=file]{display:block;max-width:100%;margin-top:10px;font:inherit}input::file-selector-button{background:#e5eddc;border:0;padding:9px 12px;border-radius:6px;color:#203e34;margin-right:10px;cursor:pointer}.existing{overflow-wrap:anywhere;font-size:12px}.feedback{font-size:12px;overflow-wrap:anywhere}.preview{max-width:100%;max-height:160px;border-radius:8px;margin-top:12px}.actions{background:#203e34;color:white;border-radius:12px;padding:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}button{border:0;border-radius:7px;padding:12px 18px;font:600 13px 'Segoe UI',sans-serif;cursor:pointer;background:#d2fa43;color:#203e34}button:disabled{opacity:.6;cursor:wait}.remove{background:transparent;padding:5px 0;text-decoration:underline;font-size:12px}.notice{padding:16px;background:#e5edce;border-radius:10px;margin:16px 0}.errorlist{color:#a03832;padding-left:18px}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #86a852;outline-offset:4px}[hidden]{display:none!important}aside ul{padding-left:18px}aside li{margin:12px 0}.count{font-size:32px;font-weight:700}@media(max-width:850px){.layout{grid-template-columns:1fr}header{flex-wrap:wrap;gap:14px}h1{font-size:28px}main{padding:0 16px 30px}.card{padding:20px}}
+</style></head><body>
+<div class="site-language-tools">{% include 'includes/language_picker.html' %}</div>
+<header><a class="brand" href="{% url 'jobseeker_dashboard' %}">{% include 'includes/brand_logo.html' %}SERVINN</a><nav aria-label="Account navigation"><a href="{% url 'profile_setup' %}">My profile</a><a href="{% url 'my_applications' %}">My applications</a></nav></header>
+<main><a href="{% url 'jobseeker_dashboard' %}">&larr; Back to dashboard</a>
+<div class="intro"><p class="eyebrow">Your account / Documents</p><h1>Build a profile employers can trust.</h1><p class="muted">Keep your documents together and upload replacements when needed.</p></div>
+{% for message in messages %}<p class="notice" role="status">{{ message }}</p>{% endfor %}
+<div class="layout"><div>
+{% if account.admin_notes %}<div class="notice"><strong>Administrator feedback</strong><p>{{ account.admin_notes|linebreaksbr }}</p></div>{% endif %}
+{% if account.reviewed_at %}<small>Last reviewed: {{ account.reviewed_at|date:'M j, Y g:i a' }}</small>{% endif %}
+<form method="post" enctype="multipart/form-data" id="documents-form">{% csrf_token %}
+{% if form.errors %}<div class="notice" role="alert"><strong>Please check your uploads.</strong>{{ form.non_field_errors }}<p>Files must be selected again after an unsuccessful submission.</p></div>{% endif %}
+{% for document in documents %}<section class="card document" data-kind="{{ document.kind }}"><div class="document-head"><h2><label for="{{ document.field.id_for_label }}">{{ document.field.label }}</label></h2><span class="tag">{% if document.existing %}On file{% else %}Not uploaded{% endif %}</span></div>
+{% if document.existing %}<div class="existing"><a href="{% url 'profile_file' account_id document.kind %}">Download {{ document.existing.name }}</a>{% if document.existing.uploaded_at %}<br><small>Uploaded {{ document.existing.uploaded_at|date:'M j, Y g:i a' }}</small>{% endif %}</div>{% endif %}
+<div class="file-area"><small>{% if document.existing %}Choose a replacement{% else %}Choose a file{% endif %} &middot; {% if document.kind == 'resume_document' %}PDF{% else %}PDF, JPG or PNG{% endif %} &middot; Up to 5 MB</small>{{ document.field }}<p class="feedback" aria-live="polite"></p><img class="preview" alt="Selected document preview" hidden><button type="button" class="remove" hidden>Clear selection</button></div>{{ document.field.errors }}</section>{% endfor %}
+<div class="actions"><div><strong id="selected-count" aria-live="polite">No new files selected</strong><br><small style="color:#d4e0d7">Existing documents stay unless you select replacements.</small></div><button type="submit" id="submit-documents">Submit for review &rarr;</button></div>
+<p class="muted">Submitting any document returns your account to review. Job applications are paused until approval.</p></form></div>
+<aside><section class="card"><h2>Your document folder</h2><div class="count">{{ uploaded_count }} <small style="font-size:13px">of {{ document_type_count }} document types on file</small></div><p class="muted">This is a file count, not your verification score. Upload clearances relevant to your application or requested by the administrator.</p></section><section class="card"><h2>Before you upload</h2><ul><li>Use a clear, readable copy with all edges visible.</li><li>Make sure your name matches your profile.</li><li>Use PDF for your resume.</li><li>Follow the administrator's correction notes.</li></ul><p class="muted">Files are stored privately. Automatic file checks do not verify authenticity; an administrator reviews your documents.</p></section></aside></div></main>
+<script>
+(() => {
+ const form=document.getElementById('documents-form');
+ const inputs=Array.from(form.querySelectorAll('input[type=file]'));
+ function count(){const n=inputs.filter(input=>input.files.length).length;document.getElementById('selected-count').textContent=n ? n+' new file'+(n===1?'':'s')+' selected' : 'No new files selected';}
+ inputs.forEach(input=>{
+  const card=input.closest('.document'), feedback=card.querySelector('.feedback'), preview=card.querySelector('.preview'), clear=card.querySelector('.remove');let url;
+  function update(){if(url){URL.revokeObjectURL(url);url=null;}preview.hidden=true;preview.removeAttribute('src');input.setCustomValidity('');const file=input.files[0];clear.hidden=!file;
+   if(!file){feedback.textContent='';count();return;}
+   const extension=file.name.split('.').pop().toLowerCase();const allowed=card.dataset.kind==='resume_document'?['pdf']:['pdf','png','jpg','jpeg'];
+   if(file.size>5*1024*1024 || !allowed.includes(extension)){input.setCustomValidity('Choose an allowed file no larger than 5 MB.');feedback.textContent='Choose an allowed file no larger than 5 MB.';}
+   else {feedback.textContent=file.name+' ? '+(file.size/1024/1024).toFixed(2)+' MB';if(['png','jpg','jpeg'].includes(extension)){url=URL.createObjectURL(file);preview.src=url;preview.hidden=false;}}
+   count();
+  }
+  input.addEventListener('change',update);clear.addEventListener('click',()=>{input.value='';update();input.focus();});
+ });
+ form.addEventListener('submit',event=>{if(!inputs.some(input=>input.files.length)){event.preventDefault();document.getElementById('selected-count').textContent='Choose at least one document before submitting.';inputs[0].focus();return;}const button=document.getElementById('submit-documents');button.disabled=true;button.textContent='Uploading...';});
+ window.addEventListener('pageshow',()=>{document.getElementById('submit-documents').disabled=false;document.getElementById('submit-documents').textContent='Submit for review ?';count();});
+})();
+</script>{% include 'includes/language_scripts.html' %}
+</body></html>

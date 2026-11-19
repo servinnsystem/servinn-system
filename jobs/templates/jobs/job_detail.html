@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ job.title }} | SERVINN</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+<div class="site-language-tools">{% include 'includes/language_picker.html' %}</div>
+    <header class="navbar">
+        <h2>SERVINN | Job Details</h2>
+        <nav>
+            <a href="{% url 'job_search' %}">Back to Search</a>
+            <a href="{% url 'logout' %}">Sign Out</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <article class="job-detail-card">
+            <header class="job-detail-header">
+                <h1>{{ job.title }}</h1>
+                <h3>{{ job.company_name }}</h3>
+                {% if request.session.user_role == 'job_seeker' and job.employer_email %}
+                <a href="{% url 'job_employer_profile' job.id %}">View employer profile &rarr;</a>
+                {% endif %}
+                <p class="job-meta">
+                    <span><strong>Location:</strong> {{ job.location }}</span> | 
+                    <span><strong>Category:</strong> {{ job.category }}</span> | 
+                    <span><strong>Employment Type:</strong> {{ job.job_type }}</span>
+                </p>
+            </header>
+
+            <hr>
+
+            <section class="job-section">
+                <h2>Required Skills</h2>
+                <div class="skills-tags">
+                    {% for skill in job.required_skills %}
+                        <span class="tag">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="job-section">
+                <h2>Job Description</h2>
+                <div data-user-content>{{ job.description|linebreaks }}</div>
+            </section>
+
+            <footer class="job-action-footer">
+                {% if request.session.user_role == 'job_seeker' %}
+                    {% if already_applied %}
+                        <button class="btn-disabled" disabled>Application Already Submitted</button>
+                    {% else %}
+                        <form method="post" action="{% url 'apply_job' job.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-primary-lg">Submit Application Now</button>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    <p class="info-text">Please log in as a Job Seeker to apply for this job posting.</p>
+                {% endif %}
+            </footer>
+        </article>
+    </main>
+{% include 'includes/language_scripts.html' %}
+</body>
+</html>

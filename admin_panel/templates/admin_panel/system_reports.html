@@ -1,0 +1,74 @@
+{% extends 'admin_panel/base.html' %}
+
+{% block content %}
+  <a class="button" style="margin-bottom:16px" href="{% url 'admin_dashboard' %}" aria-label="Back to admin dashboard">&larr; Back</a>
+  <div class="page-header">
+    <h1>Application reports</h1>
+    <p class="muted">Overview of overall application performance, status breakdowns, and acceptance rates.</p>
+  </div>
+
+  <section aria-label="Application performance metrics">
+    <dl class="cards">
+      <div class="card">
+        <dt class="label">Total Applications</dt>
+        <dd class="value">{{ total_apps }}</dd>
+      </div>
+
+      <div class="card">
+        <dt class="label">Accepted</dt>
+        <dd class="value">{{ accepted }}</dd>
+      </div>
+
+      <div class="card">
+        <dt class="label">Rejected</dt>
+        <dd class="value">{{ rejected }}</dd>
+      </div>
+
+      <div class="card">
+        <dt class="label">Shortlisted</dt>
+        <dd class="value">{{ shortlisted }}</dd>
+      </div>
+
+      <div class="card">
+        <dt class="label">Acceptance Rate</dt>
+        <dd class="value">{{ placement_rate }}%</dd>
+      </div>
+    </dl>
+  </section>
+
+  <style>
+    .page-header {
+      margin-bottom: 24px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e0e8e1;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 6px;
+    }
+    .card .label {
+      font-size: 12px;
+      color: #718278;
+      font-weight: 500;
+      margin: 0;
+    }
+    .card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #203e34;
+      margin: 0;
+      line-height: 1.1;
+    }
+  </style>
+{% endblock %}

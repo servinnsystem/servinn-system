@@ -1,0 +1,158 @@
+{% extends 'admin_panel/base.html' %}
+
+{% block content %}
+  <div class="login-wrapper">
+    <div class="card login">
+      <header class="login-header">
+        <p class="eyebrow" id="admin-notice">Private Administrator Access</p>
+        <h1>Administrator Login</h1>
+      </header>
+
+      {% if messages or form.errors %}
+        <div class="error-box" role="alert" aria-live="assertive">
+          {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+              <p>{{ error }}</p>
+            {% endfor %}
+          {% else %}
+            <p>Invalid username or password. Please try again.</p>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <form method="post" aria-describedby="admin-notice">
+        {% csrf_token %}
+        
+        <div class="field">
+          <label for="username">Username</label>
+          <input 
+            type="text"
+            id="username" 
+            name="username" 
+            autocomplete="username" 
+            required 
+            autofocus
+            {% if form.errors %}aria-invalid="true"{% endif %}
+            class="form-control"
+          >
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            autocomplete="current-password" 
+            required
+            {% if form.errors %}aria-invalid="true"{% endif %}
+            class="form-control"
+          >
+        </div>
+
+        <button type="submit" class="button button-primary">Sign in to administration</button>
+      </form>
+
+      <footer class="login-footer">
+        <a class="back-link" href="{% url 'home' %}">&larr; Back to SERVINN</a>
+      </footer>
+    </div>
+  </div>
+
+  <style>
+    .login-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 70vh;
+      padding: 20px;
+    }
+    .card.login {
+      width: 100%;
+      max-width: 420px;
+      background: #ffffff;
+      border: 1px solid #e0e8e1;
+      border-radius: 14px;
+      padding: 32px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    }
+    .eyebrow {
+      font-size: 10px;
+      color: #718278;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+    }
+    .login-header h1 {
+      font-size: 24px;
+      margin: 0 0 20px 0;
+      color: #203e34;
+      letter-spacing: -0.5px;
+    }
+    .field {
+      margin-bottom: 18px;
+    }
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #203e34;
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d5e1d8;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #203e34;
+      background: #fcfdfc;
+    }
+    .form-control:focus {
+      outline: 3px solid #83a66d;
+      outline-offset: 2px;
+    }
+    .button-primary {
+      width: 100%;
+      padding: 13px;
+      border: 0;
+      border-radius: 8px;
+      background: #315a46;
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .button-primary:hover, .button-primary:focus-visible {
+      background: #234a3b;
+    }
+    .error-box {
+      background: #f9e7e5;
+      border: 1px solid #e6c6c0;
+      color: #a35349;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      margin-bottom: 20px;
+    }
+    .error-box p {
+      margin: 0;
+    }
+    .login-footer {
+      margin-top: 24px;
+      text-align: center;
+      border-top: 1px solid #edf1ee;
+      padding-top: 18px;
+    }
+    .back-link {
+      font-size: 12px;
+      color: #718278;
+      text-decoration: underline;
+    }
+    .back-link:hover, .back-link:focus-visible {
+      color: #203e34;
+    }
+  </style>
+{% endblock %}

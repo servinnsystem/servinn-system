@@ -1,0 +1,235 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERVINN | Employer Hiring Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --ink:#203e34; --muted:#8b9691; --green:#3e6453; --lime:#d2fa43; --canvas:#eff5f2; }
+        * { box-sizing:border-box; }
+        body { margin:0; padding:60px 28px; min-height:100vh; background:#cedad6; color:var(--ink); font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; }
+        a { color:inherit; text-decoration:none; }
+        a:focus-visible, input:focus-visible { outline:3px solid #86ab26; outline-offset:4px; }
+        .dashboard-container { max-width:1380px; min-height:820px; margin:auto; display:grid; grid-template-columns:220px minmax(0,1fr); background:white; border-radius:28px; overflow:hidden; }
+        .sidebar { padding:32px 20px 24px; display:flex; flex-direction:column; justify-content:space-between; }
+        .brand { display:flex; align-items:center; gap:10px; font-size:23px; font-weight:800; letter-spacing:-1px; margin:0 12px 32px; }
+        .brand-mark { width:24px; height:24px; border-radius:50%; background:linear-gradient(90deg,#43d974 50%,#d2fa43 50%); }
+        .user-profile-summary { text-align:center; padding:0 0 28px; }
+        .avatar-img { width:58px; height:58px; border-radius:50%; object-fit:cover; border:4px solid #f2f6ee; }
+        .user-name { font-size:13px; margin:10px 0 5px; overflow-wrap:anywhere; }
+        .user-role { color:var(--muted); font-size:11px; margin:0; }
+        .nav-menu { list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+        .nav-item a { display:flex; gap:12px; align-items:center; padding:13px 14px; border-radius:8px; font-size:12px; font-weight:600; }
+        .nav-item a:hover { background:#edf4ee; }
+        .nav-item.active a { background:var(--green); color:white; }
+        .nav-icon { width:17px; font-size:17px; text-align:center; font-weight:400; }
+        .sidebar-bottom { padding:28px 14px 0; font-size:11px; }
+        .sidebar-bottom p { color:var(--muted); line-height:1.8; }
+        .profile-line { height:4px; background:var(--lime); margin:9px 0; border-radius:4px; }
+        .logout { display:block; margin-top:28px; font-size:12px; }
+        .main-content { min-width:0; background:var(--canvas); border-radius:28px 0 0 28px; padding:26px 36px 36px; }
+        .topbar { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:48px; }
+        .top-links { display:flex; gap:22px; font-size:11px; font-weight:700; }
+        .top-actions { display:flex; align-items:center; gap:18px; }
+        .search { border:0; background:#e4ebe7; border-radius:30px; padding:10px 16px; width:190px; font:inherit; font-size:11px; }
+        .post-button { background:var(--green); color:white; border-radius:24px; padding:11px 19px; font-size:11px; white-space:nowrap; }
+        .header-bar { margin-bottom:25px; }
+        h1 { font-size:27px; font-weight:600; letter-spacing:-.8px; margin:0; }
+        h2 { font-size:14px; font-weight:600; margin:0; }
+        .metrics-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:20px; margin-bottom:30px; }
+        .metric-card { background:white; padding:24px 20px; border-radius:16px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+        .metric-value { font-size:28px; letter-spacing:-1px; font-weight:600; }
+        .metric-card p { font-size:10px; color:var(--muted); margin:4px 0 0; }
+        .metric-icon { flex-shrink:0; display:grid; place-items:center; width:42px; height:42px; border-radius:50%; background:var(--lime); font-size:19px; }
+        .content-grid { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr); gap:26px; margin-bottom:26px; align-items:start; }
+        .panel { background:white; border-radius:13px; overflow:hidden; }
+        .panel-header { padding:22px; border-bottom:1px solid #f0f3f1; display:flex; justify-content:space-between; align-items:center; gap:15px; }
+        .panel-header a { font-size:10px; color:var(--muted); }
+        .chart { padding:24px; min-height:290px; }
+        .chart-note { color:var(--muted); font-size:11px; line-height:1.7; margin:0 0 26px; }
+        .bar-row { display:grid; grid-template-columns:95px 1fr 25px; gap:12px; align-items:center; margin:24px 0; font-size:11px; }
+        .bar-track { background:#f0f5ee; border-radius:7px; height:18px; overflow:hidden; }
+        .bar-fill { background:linear-gradient(90deg,#b7e99a,var(--lime)); height:100%; border-radius:7px; }
+        .active-jobs-grid { padding:9px 22px; max-height:340px; overflow:auto; }
+        .job-card { display:grid; grid-template-columns:33px minmax(0,1fr) auto; align-items:start; gap:12px; padding:18px 0; border-bottom:1px solid #edf2ee; }
+        .job-card:last-child { border:0; }
+        .job-symbol { width:33px; height:33px; border-radius:9px; background:#eff6dc; color:var(--green); display:grid; place-items:center; font-weight:700; flex-shrink:0; }
+        .job-card h3 { font-size:11px; margin:0 0 5px; }
+        .job-card p { margin:0; font-size:10px; color:var(--muted); }
+        .job-summary{min-width:0;overflow-wrap:anywhere}
+        .status-pill { font-size:10px; padding:5px 9px; border-radius:20px; background:#f3eee5; color:#80653b; white-space:nowrap; }
+        .status-pill.active { color:#326341; background:#eaf4e6; }
+        .job-controls{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:3px}
+        .edit-job-button,.update-job-button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:10px 16px;border-radius:8px;font:600 12px 'Plus Jakarta Sans',sans-serif;cursor:pointer;white-space:nowrap;text-decoration:none;transition:background .15s}
+        .edit-job-button{border:1px solid #cbd9ce;color:#315a46;background:white}
+        .edit-job-button:hover{background:#edf4ee}
+        .job-status-form{display:flex;align-items:center;gap:8px;flex:1 1 220px;min-width:0;margin:0}
+        .job-status-form select{flex:1;width:0;min-width:0;max-width:100%;min-height:40px;padding:9px 10px;border:1px solid #cbd9ce;border-radius:8px;background:#fafcf9;color:var(--ink);font:12px 'Plus Jakarta Sans',sans-serif;cursor:pointer}
+        .update-job-button{border:1px solid var(--green);background:var(--green);color:white;flex-shrink:0}
+        .update-job-button:hover{background:#294e3c}
+        .panel-header .add-job-link{font-size:11px;font-weight:600;color:#315a46;background:#eef5e5;padding:9px 12px;border:1px solid #dce8d0;border-radius:8px;white-space:nowrap}
+        .panel-header .add-job-link:hover{background:#e2edce}
+        .job-controls :focus-visible,.add-job-link:focus-visible{outline:3px solid #86ab26;outline-offset:3px}
+        .empty { color:var(--muted); font-size:12px; line-height:1.9; padding:24px 0; }
+        .empty a { color:var(--green); text-decoration:underline; }
+        .table-scroll { overflow:auto; padding:8px 22px 20px; }
+        .data-table { width:100%; border-collapse:collapse; white-space:nowrap; }
+        .data-table th { text-align:left; color:var(--muted); font-size:10px; font-weight:500; padding:15px 10px; }
+        .data-table td { font-size:11px; padding:16px 10px; border-top:1px solid #f2f5f3; }
+        .notice { background:#e3edcf; padding:12px 16px; border-radius:9px; }
+        @media(min-width:1500px) { body { padding-top:80px; } }
+        @media(max-width:1100px) { .metrics-grid { gap:12px; } .metric-card { padding:18px 12px; } .main-content { padding:25px; } .top-links { gap:12px; } .search { width:145px; } }
+        @media(max-width:900px) { .dashboard-container { grid-template-columns:180px minmax(0,1fr); } .metrics-grid { grid-template-columns:repeat(2,1fr); } .content-grid { grid-template-columns:1fr; } .top-links { display:none; } .topbar { justify-content:flex-end; margin-bottom:30px; } .sidebar { padding:25px 12px; } }
+        @media(max-width:600px) { body { padding:12px; } .dashboard-container { display:block; border-radius:18px; } .sidebar { padding:18px; } .brand { margin:0 0 18px; } .user-profile-summary,.sidebar-bottom { display:none; } .nav-menu { display:flex; overflow:auto; gap:4px; } .nav-item a { white-space:nowrap; padding:10px; } .main-content { border-radius:18px; padding:20px 16px; } .topbar { margin-bottom:25px; } .metric-icon { width:34px; height:34px; } h1 { font-size:24px; } }
+        .applicant-summary { margin-bottom:26px; }
+        .pie-layout { display:flex; align-items:center; justify-content:center; gap:48px; padding:28px; flex-wrap:wrap; }
+        .applicant-pie { width:210px; height:210px; border-radius:50%; background:#e4ebe7; flex-shrink:0; }
+        .pie-legend { min-width:220px; }
+        .pie-total { font-size:24px; font-weight:700; margin-bottom:8px; }
+        .pie-caption { color:var(--muted); font-size:11px; margin:0 0 20px; }
+        .pie-item { display:flex; gap:10px; align-items:center; margin:16px 0; font-size:12px; }
+        .pie-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+        .pie-item strong { margin-left:auto; }
+        .pie-item small { color:var(--muted); min-width:45px; text-align:right; }
+        .pie-dot.pending { background:#b9df42; } .pie-dot.accepted { background:#3e6453; } .pie-dot.rejected { background:#d77b72; }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <div>
+            <a class="brand" href="{% url 'employer_dashboard' %}">{% include 'includes/brand_logo.html' %}SERVINN</a>
+            <div class="user-profile-summary">
+                {% if employer.profile_photo_file %}
+                <img src="{% url 'profile_file' request.session.user_email 'profile_photo' %}" class="avatar-img" alt="Profile Photo">
+                {% elif employer.profile_photo %}
+                <img src="data:image/jpeg;base64,{{ employer.profile_photo }}" class="avatar-img" alt="Company profile" data-fallback-src="{% static 'images/default-avatar.svg' %}">
+                {% else %}<img src="{% static 'images/default-avatar.svg' %}" class="avatar-img" alt="Company profile">{% endif %}
+                <h3 class="user-name">{{ company_name }}</h3>
+                <p class="user-role">{{ employer.location|default:'Employer account' }}</p>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active"><a href="{% url 'employer_dashboard' %}"><span class="nav-icon" aria-hidden="true">&#9783;</span>Dashboard</a></li>
+                <li class="nav-item"><a href="{% url 'post_job' %}"><span class="nav-icon" aria-hidden="true">&#9998;</span>Post New Job</a></li>
+                <li class="nav-item"><a href="#job-postings"><span class="nav-icon" aria-hidden="true">&#9634;</span>Job Postings</a></li>
+                <li class="nav-item"><a href="{% url 'view_applicants' %}"><span class="nav-icon" aria-hidden="true">&#9825;</span>Applicants</a></li>
+                <li class="nav-item"><a href="{% url 'create_company' %}"><span class="nav-icon" aria-hidden="true">&#9881;</span>Company Settings</a></li>
+                <li class="nav-item"><a href="{% url 'logout' %}"><span class="nav-icon" aria-hidden="true">&#8594;</span>Logout</a></li>
+            </ul>
+            <style>
+                .sidebar .language-picker{margin-top:auto;padding:10px;width:100%;font-size:12px}
+                @media(max-width:600px){.sidebar .language-picker{max-width:230px;margin-top:22px}}
+            </style>
+        </div>
+        {% include 'includes/language_picker.html' %}
+    </aside>
+    <main class="main-content">
+        <div class="topbar">
+            <nav class="top-links" aria-label="Quick links"><a href="{% url 'employer_dashboard' %}">Home</a><a href="#job-postings">Jobs</a><a href="{% url 'view_applicants' %}">Applicants</a><a href="{% url 'create_company' %}">My Profile</a></nav>
+            <div class="top-actions"><input class="search" type="search" id="job-search" placeholder="Search your jobs..." aria-label="Search your posted jobs"><a class="post-button" href="{% url 'post_job' %}">Post a Job</a></div>
+        </div>
+        {% for message in messages %}<p class="notice" role="status">{{ message }}</p>{% endfor %}
+        <header class="header-bar"><h1>Dashboard</h1></header>
+        <section class="metrics-grid" aria-label="Hiring statistics">
+            <a href="#job-postings" class="metric-card"><div><div class="metric-value">{{ total_jobs|stringformat:'02d' }}</div><p>Posted Jobs</p></div><span class="metric-icon" aria-hidden="true">&#9634;</span></a>
+            <a href="{% url 'view_applicants' %}" class="metric-card"><div><div class="metric-value">{{ shortlisted_hired|stringformat:'02d' }}</div><p>Shortlisted / Hired</p></div><span class="metric-icon" aria-hidden="true">&#9825;</span></a>
+            <a href="{% url 'view_applicants' %}" class="metric-card"><div><div class="metric-value">{{ total_applicants|stringformat:'02d' }}</div><p>Applications</p></div><span class="metric-icon" aria-hidden="true">&#9737;</span></a>
+            <a href="#job-postings" class="metric-card"><div><div class="metric-value">{{ active_jobs|stringformat:'02d' }}</div><p>Active Jobs</p></div><span class="metric-icon" aria-hidden="true">&#9998;</span></a>
+        </section>
+        <div class="content-grid">
+            <section class="panel"><div class="panel-header"><h2>Hiring Overview</h2><span>All time</span></div>
+                <div class="chart"><p class="chart-note">A snapshot of your job postings and candidate applications.</p>
+                    <div class="bar-row"><span>Posted jobs</span><div class="bar-track"><div class="bar-fill" data-width="{% widthratio total_jobs overview_max 100 %}"></div></div><strong>{{ total_jobs }}</strong></div>
+                    <div class="bar-row"><span>Active jobs</span><div class="bar-track"><div class="bar-fill" data-width="{% widthratio active_jobs overview_max 100 %}"></div></div><strong>{{ active_jobs }}</strong></div>
+                    <div class="bar-row"><span>Applications</span><div class="bar-track"><div class="bar-fill" data-width="{% widthratio total_applicants overview_max 100 %}"></div></div><strong>{{ total_applicants }}</strong></div>
+                    <div class="bar-row"><span>Shortlisted / hired</span><div class="bar-track"><div class="bar-fill" data-width="{% widthratio shortlisted_hired overview_max 100 %}"></div></div><strong>{{ shortlisted_hired }}</strong></div>
+                </div>
+            </section>
+        <section id="job-postings" class="panel">
+            <div class="panel-header"><h2>Posted Jobs</h2><a class="add-job-link" href="{% url 'post_job' %}">+ Add new</a></div>
+            <div class="active-jobs-grid">
+                {% for job in recent_jobs %}
+                <article class="job-card">
+                    <span class="job-symbol" aria-hidden="true">{{ job.title|first|upper }}</span><div class="job-summary"><h3>{{ job.title }}</h3>{% include 'includes/job_rating.html' %}<p>{{ job.job_type }} &middot; {{ job.location }}</p></div>
+                    <span class="status-pill {% if job.status == 'Active' and job.review_status == 'Approved' %}active{% else %}closed{% endif %}">{% if job.status == 'Active' and job.review_status != 'Approved' %}Awaiting admin review{% else %}{{ job.status }}{% endif %}</span>
+                    <div class="job-controls">
+                    {% if job.review_note %}<p role="status">Admin feedback: {{ job.review_note }}</p>{% endif %}
+                    <a class="edit-job-button" href="{% url 'edit_job' job.id %}" aria-label="Edit {{ job.title }}">Edit</a>
+                    <form class="job-status-form" method="post" action="{% url 'job_status' job.id %}">
+                        {% csrf_token %}<select name="status" aria-label="Posting status for {{ job.title }}">
+                        {% if job.review_status == 'Approved' %}<option value="Active" {% if job.status == 'Active' %}selected{% endif %}>Active</option>{% else %}<option value="" {% if job.status != 'Closed' and job.status != 'Archived' %}selected{% endif %} disabled>Admin approval required</option>{% endif %}
+                        <option value="Closed" {% if job.status == 'Closed' %}selected{% endif %}>Closed</option>
+                        <option value="Archived" {% if job.status == 'Archived' %}selected{% endif %}>Archive / remove from search</option>
+                        </select><button class="update-job-button" type="submit" aria-label="Update status for {{ job.title }}">Update</button>
+                    </form>
+                    </div>
+                </article>
+                {% empty %}<p class="empty">No jobs posted yet. <a href="{% url 'post_job' %}">Create your first job posting</a>.</p>{% endfor %}
+            </div>
+        </section>
+        </div>
+        <section class="panel applicant-summary" aria-labelledby="applicant-summary-title">
+            <div class="panel-header"><h2 id="applicant-summary-title">Application Status</h2><a href="{% url 'view_applicants' %}">Manage applicants &#8599;</a></div>
+            <div class="pie-layout">
+                <div class="applicant-pie" id="applicant-pie" role="img" aria-label="Application status pie chart" aria-describedby="application-legend"></div>
+                <div class="pie-legend" id="application-legend">
+                    <div class="pie-total">{{ total_applicants }} applications</div>
+                    <p class="pie-caption">Pending includes submitted and shortlisted applications.</p>
+                    {% for item in application_breakdown %}
+                    <div class="pie-item"><span class="pie-dot {% if forloop.first %}pending{% elif forloop.last %}rejected{% else %}accepted{% endif %}" aria-hidden="true"></span><span>{{ item.label }}</span><strong>{{ item.count }}</strong><small>{{ item.percentage }}%</small></div>
+                    {% endfor %}
+                    {% if not total_applicants %}<p class="pie-caption">Your chart will fill in when candidates apply.</p>{% endif %}
+                </div>
+            </div>
+        </section>
+        {{ application_breakdown|json_script:'application-breakdown' }}
+        <section class="panel"><div class="panel-header"><h2>Candidate Applications</h2><a href="{% url 'view_applicants' %}">View all applicants &#8599;</a></div><div class="table-scroll">
+            <table class="data-table"><thead><tr><th>Candidate</th><th>Position</th><th>Status</th></tr></thead>
+                <tbody>{% for app in recent_applications %}<tr class="table-row"><td>{{ app.applicant_name }}</td><td>{{ app.job_title }}</td><td>{{ app.status }}</td></tr>
+                {% empty %}<tr><td colspan="3">No applications received yet.</td></tr>{% endfor %}</tbody>
+            </table></div>
+        </section>
+    </main>
+</div>
+<script>
+    const breakdown = JSON.parse(document.getElementById('application-breakdown').textContent);
+    const applicationTotal = breakdown.reduce((sum, item) => sum + item.count, 0);
+    if (applicationTotal > 0) {
+        let start = 0;
+        const slices = breakdown.filter(item => item.count > 0).map(item => {
+            const end = start + item.count / applicationTotal * 360;
+            const slice = `${item.color} ${start}deg ${end}deg`;
+            start = end;
+            return slice;
+        });
+        document.getElementById('applicant-pie').style.background = `conic-gradient(${slices.join(', ')})`;
+    }
+
+    document.querySelectorAll('.bar-fill[data-width]').forEach(bar => {
+        const width = Number(bar.dataset.width);
+        bar.style.width = (Number.isFinite(width) ? Math.max(0, Math.min(100, width)) : 0) + '%';
+    });
+    document.querySelectorAll('img[data-fallback-src]').forEach(photo => {
+        const showFallback = () => {
+            const fallback = photo.dataset.fallbackSrc;
+            if (!fallback) return;
+            delete photo.dataset.fallbackSrc;
+            photo.src = fallback;
+        };
+        photo.addEventListener('error', showFallback);
+        if (photo.complete && photo.naturalWidth === 0) showFallback();
+    });
+    document.getElementById('job-search').addEventListener('input', function () {
+        const query = this.value.trim().toLowerCase();
+        document.querySelectorAll('.job-card').forEach(card => {
+            card.hidden = !card.textContent.toLowerCase().includes(query);
+            card.style.display = card.hidden ? 'none' : '';
+        });
+    });
+</script>
+{% include 'includes/language_scripts.html' %}
+<script src="{% static 'js/job_ratings.js' %}" defer></script>
+</body>
+</html>

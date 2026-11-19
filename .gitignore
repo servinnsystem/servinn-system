@@ -1,0 +1,14 @@
+private_uploads/
+backups/
+serviceAccountKey.json
+env/
+venv/
+.venv/
+db.sqlite3
+media/
+staticfiles/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example

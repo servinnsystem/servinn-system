@@ -1,0 +1,333 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SERVINN | Local opportunities</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#f2f6f3;color:#203e34;font:14px 'Segoe UI',sans-serif}
+    a{color:inherit;text-decoration:none}
+    button,input,select{font:inherit}
+    aside.sidebar{position:fixed;inset:0 auto 0 0;width:225px;background:white;padding:32px 24px;border-right:1px solid #e2eae4}
+    .brand{font-size:26px;font-weight:800;letter-spacing:-1px}
+    .brand span{color:#7ca740}
+    .profile{margin:30px 0;text-align:center}
+    .avatar{height:66px;width:66px;object-fit:cover;border-radius:50%;background:#e2edcf}
+    .profile h2{font-size:14px;margin:10px 0 4px}
+    .muted{color:#78867f;font-size:12px;line-height:1.8}
+    nav{display:grid;gap:8px}
+    nav a{padding:13px;border-radius:8px;font-size:13px;transition:background 0.2s}
+    nav a:hover,nav .active{background:#315a46;color:white}
+    main{margin-left:225px;padding:32px 40px;max-width:1550px}
+    .top{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #dfe8e1;padding-bottom:22px;margin-bottom:30px}
+    .eyebrow{color:#7c8a81;letter-spacing:1.7px;font-size:10px;text-transform:uppercase}
+    h1{font-size:32px;letter-spacing:-1px;margin:10px 0}
+    h2{font-size:18px}
+    h3{margin:0 0 10px}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:25px 0}
+    .stat{background:white;border:1px solid #e3eae4;border-radius:13px;padding:20px;transition:border-color 0.2s}
+    .stat:hover,.stat:focus-visible{border-color:#8aa953}
+    .stat strong{display:block;font-size:27px;margin-bottom:5px}
+    .search{background:#234a3b;border-radius:15px;padding:24px;color:white;margin-bottom:26px}
+    .search-grid{display:grid;grid-template-columns:1.3fr 1fr 160px auto;gap:10px}
+    input,select{min-width:0;width:100%;padding:12px;border:1px solid #dae5dd;border-radius:7px;background:white;color:#203e34}
+    .checks{display:flex;gap:25px;margin-top:16px;font-size:12px;flex-wrap:wrap;align-items:center}
+    .checks input{width:auto}
+    .search label.field{font-size:11px;display:grid;gap:7px}
+    button,.button{border:0;border-radius:7px;padding:12px 18px;background:#315a46;color:white;cursor:pointer;font-weight:600;font-size:12px;display:inline-block}
+    .search button{background:#d2fa43;color:#203e34;align-self:end}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) 275px;gap:24px}
+    .card{background:white;border:1px solid #e3eae4;border-radius:14px;padding:25px;margin-bottom:18px}
+    .job-top,.actions{display:flex;justify-content:space-between;gap:16px;align-items:center}
+    .badge{display:inline-block;background:#eef5df;color:#507137;padding:5px 10px;border-radius:20px;font-size:10px;margin-bottom:12px}
+    .company{font-size:12px;color:#6c7c71;line-height:1.8}
+    .actions{border-top:1px solid #edf1ee;margin-top:20px;padding-top:16px}
+    .save{background:white;color:#315a46;border:1px solid #d7e3da}
+    .save:hover,.save:focus-visible{background:#f2f6f3}
+    .skills{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0}
+    .skills span{font-size:10px;background:#f2f5f3;padding:6px 9px;border-radius:5px}
+    details{margin-top:16px;font-size:12px;line-height:1.8}
+    summary{cursor:pointer;font-weight:600}
+    .description{white-space:normal;overflow-wrap:anywhere}
+    .notice{padding:15px;background:#e4efcc;border-radius:9px;margin-bottom:15px}
+    .feed-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .feed-title a{text-decoration:underline;font-size:12px}
+    .application{padding:12px 0;border-bottom:1px solid #e5ece7;font-size:12px}
+    .application strong{display:block;margin-bottom:5px}
+    .side-link{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:44px;margin-top:14px;padding:11px 13px;border:1px solid #d7e3da;border-radius:9px;background:#f4f8f3;color:#315a46;font-size:12px;font-weight:600;line-height:1.5;text-decoration:none;overflow-wrap:anywhere;transition:background .18s,border-color .18s,color .18s}
+    .side-link::after{content:"\2192";flex-shrink:0;font-size:17px;line-height:1}
+    .side-link:hover{background:#e8f0e6;border-color:#8aa989}
+    .side-link-primary{background:#315a46;border-color:#315a46;color:#fff}
+    .side-link-primary:hover{background:#234a3b;border-color:#234a3b}
+    .side-link:active{background:#dce8da}
+    .side-link-primary:active{background:#193e30}
+    .side-link:focus-visible{outline:3px solid #8aa953;outline-offset:3px}
+    .empty{padding:35px;text-align:center}
+    .job-top h3{font-size:20px;margin:0 0 6px}
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #8aa953;outline-offset:3px}
+    @media(max-width:1050px){
+      .layout{grid-template-columns:1fr}
+      .search-grid{grid-template-columns:1fr 1fr}
+      .right{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+      main{padding:25px}
+    }
+    @media(max-width:700px){
+      aside.sidebar{position:static;width:auto;padding:20px}
+      .profile{display:none}
+      nav{display:flex;overflow-x:auto;margin-top:15px}
+      nav a{white-space:nowrap}
+      main{margin:0;padding:20px 15px}
+      .stats{gap:8px}
+      .stat{padding:15px}
+      .right,.search-grid{grid-template-columns:1fr}
+      .top{gap:15px}
+      h1{font-size:27px}
+      .card{padding:20px}
+      .actions{flex-wrap:wrap}
+    }
+  .layout{grid-template-columns:190px minmax(0,1fr) 240px}.search-grid{grid-template-columns:1.3fr 1fr auto}.job-filters{background:white;border:1px solid #e3eae4;border-radius:12px;padding:18px;align-self:start}.job-filters h2{font-size:14px}.job-filters details{border-bottom:1px solid #e3eae4;padding-bottom:18px;margin-bottom:18px}.job-filters label{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:12px}.job-filters input{width:auto;accent-color:#7956bf}.job-filters small{font-size:10px;color:#78867f}.job-filters summary{font-size:12px}.job-filters p{font-size:12px}@media(max-width:1200px){.layout{grid-template-columns:190px minmax(0,1fr)}.right{grid-column:1/-1}}@media(max-width:750px){.layout,.search-grid{grid-template-columns:1fr}.right{grid-column:auto}}
+.star-picker{display:inline-flex;flex-direction:row-reverse;border:0;padding:0;margin:6px 12px 6px 0;position:relative}.star-picker legend{font-size:12px}.star-picker input,.rating-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.star-picker label{font-size:28px;color:#b4beb6;cursor:pointer;padding:0 3px}.star-picker input:checked~label,.star-picker label:hover,.star-picker label:hover~label{color:#936a00}.star-picker input:focus-visible+label{outline:2px solid #315a46;outline-offset:2px}
+    .employer-card{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid #e3eae4}
+    .employer-summary{flex:1;min-width:150px}
+    .date-posted{margin:0 0 0 auto;text-align:right;font-size:11px;line-height:1.7;color:#78867f}
+    .date-posted time{display:block;white-space:nowrap;color:#203e34}
+    .employer-card img{width:56px;height:56px;object-fit:cover;border-radius:50%;background:#edf4e3;flex-shrink:0}
+    .employer-card strong{display:block;font-size:15px;margin-bottom:6px;overflow-wrap:anywhere}
+    .employer-card dl{margin:0;display:grid;gap:4px;font-size:12px;line-height:1.7}
+    .employer-card dl div{display:flex;gap:6px;flex-wrap:wrap}
+    .employer-card dt{color:#78867f}.employer-card dd{margin:0;overflow-wrap:anywhere}
+    .employer-card a{text-decoration:underline}
+    .compatibility{margin-bottom:16px}
+    .compatibility-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;font-size:12px;font-weight:600}
+    .compatibility-score{background:#e6f6eb;color:#187c40;border-radius:20px;padding:5px 10px;font-size:11px;white-space:nowrap}
+    .compatibility-track{height:7px;background:#e5ece7;border-radius:20px;overflow:hidden}
+    .compatibility-fill{height:100%;width:0;background:#22a552;border-radius:inherit}
+</style>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="{% url 'home' %}">{% include 'includes/brand_logo.html' %}SERVINN</a>
+    <div class="profile">
+      {% if user_data.profile_photo_file %}
+        <img class="avatar" src="{% url 'profile_file' request.session.user_email 'profile_photo' %}" alt="{{ user_data.full_name }}" data-fallback-src="{% static 'images/default-avatar.svg' %}">
+      {% elif user_data.profile_photo %}
+        <img class="avatar" src="data:image/jpeg;base64,{{ user_data.profile_photo }}" alt="{{ user_data.full_name }}" data-fallback-src="{% static 'images/default-avatar.svg' %}">
+      {% else %}
+        <img class="avatar" src="{% static 'images/default-avatar.svg' %}" alt="Default avatar">
+      {% endif %}
+      <h2>{{ user_data.full_name }}</h2>
+      <p class="muted">{{ user_data.location|default:'Add your location in Profile Settings' }}</p>
+    </div>
+    <nav aria-label="Job seeker navigation">
+      <a class="active" href="{% url 'jobseeker_dashboard' %}">Find local jobs</a>
+      <a href="{% url 'my_applications' %}">My applications</a>
+      <a href="{% url 'saved_jobs' %}">Saved jobs</a>
+      <a href="{% url 'profile_setup' %}">Profile Settings</a>
+      <a href="{% url 'logout' %}">Sign out</a>
+    </nav>
+    {% include 'includes/language_picker.html' %}
+    <style>
+      aside.sidebar{display:flex;flex-direction:column}
+      .sidebar>.brand,.sidebar>.profile,.sidebar>nav{flex-shrink:0}
+      .sidebar .language-picker{margin-top:auto;padding:10px;width:100%;font-size:12px}
+      @media(max-width:700px){.sidebar .language-picker{max-width:230px;margin-top:20px}}
+    </style>
+  </aside>
+
+  <main>
+
+
+    <header class="top">
+      <div>
+        <span class="eyebrow">Your local career workspace</span>
+        <h1>Find your opportunity.</h1>
+      </div>
+    </header>
+
+    <p class="muted">Explore employer postings in your city or municipality. Search by location to find work closer to home.</p>
+
+    {% for message in messages %}
+      <div class="notice" role="status">{{ message }}</div>
+    {% endfor %}
+
+    <form id="job-search-form" class="search" method="get" role="search" aria-label="Search jobs">
+      <div class="search-grid">
+        <label class="field">
+          Role or company
+          <input type="text" name="q" value="{{ query }}" placeholder="e.g. Cashier, Electrician, Office assistant">
+        </label>
+        <label class="field">
+          City, municipality or province
+          <input type="text" name="location" value="{{ location }}" placeholder="e.g. Quezon City">
+        </label>
+        
+        <button type="submit">Find jobs &rarr;</button>
+      </div>
+
+      <div class="checks">
+        <label>
+          <input type="checkbox" name="saved" value="1" {% if saved_only %}checked{% endif %}> Saved jobs only
+        </label>
+        <label>
+          <input type="checkbox" name="hide_applied" value="1" {% if hide_applied %}checked{% endif %}> Hide jobs I applied for
+        </label>
+      </div>
+    </form>
+
+    <div class="stats" role="region" aria-label="Quick statistics">
+      <a class="stat" href="{% url 'my_applications' %}" aria-label="View {{ application_count }} applications">
+        <strong>{{ application_count }}</strong> Applications
+      </a>
+      <a class="stat" href="{% url 'saved_jobs' %}" aria-label="View {{ saved_job_ids|length }} saved jobs">
+        <strong>{{ saved_job_ids|length }}</strong> Saved jobs
+      </a>
+      <a class="stat" href="{% url 'my_applications' %}" aria-label="View {{ accepted_count }} accepted applications">
+        <strong>{{ accepted_count }}</strong> Accepted
+      </a>
+    </div>
+
+    <div class="layout">
+      <aside class="job-filters" aria-label="Filter jobs">
+        <h2>Filter opportunities</h2>
+        <details open><summary>Salary</summary><label><input form="job-search-form" type="radio" name="salary_min" value="" {% if not salary_min %}checked{% endif %}> Any</label>{% for amount in salary_options %}<label><input form="job-search-form" type="radio" name="salary_min" value="{{ amount }}" {% if salary_min == amount %}checked{% endif %}> From &#8369;{{ amount }}</label>{% endfor %}<small>Amount per selected pay period.</small></details>
+        <details open><summary>Pay period</summary><label><input form="job-search-form" type="radio" name="pay_period" value="" {% if not pay_period %}checked{% endif %}> Any</label>{% for period in period_options %}<label><input form="job-search-form" type="radio" name="pay_period" value="{{ period }}" {% if pay_period == period %}checked{% endif %}> {{ period }}</label>{% endfor %}</details>
+        <details open><summary>Work experience</summary><label><input form="job-search-form" type="radio" name="experience" value="" {% if not experience %}checked{% endif %}> Any experience</label>{% for years in experience_options %}<label><input form="job-search-form" type="radio" name="experience" value="{{ years }}" {% if experience == years %}checked{% endif %}> {% if years == '0' %}No experience{% else %}{{ years }}+ years{% endif %}</label>{% endfor %}</details>
+        <details open><summary>Job type</summary><small>Leave unchecked for any type.</small>{% for type in job_types %}<label><input form="job-search-form" type="checkbox" name="job_type" value="{{ type }}" {% if type in selected_types %}checked{% endif %}> {{ type }}</label>{% endfor %}</details>
+      </aside>
+      <section aria-label="Job listings">
+        <div class="feed-title">
+          <h2>{{ recommended_matches|length }} available opportunities</h2>
+          <a href="{% url 'jobseeker_dashboard' %}">Clear filters</a>
+        </div>
+        <p class="muted">Best profile matches appear first, based on your skills and work preferences.</p>
+
+        {% for job in recommended_matches %}
+          <article class="card">
+            <div class="employer-card">
+              {% if job.employer_info.has_photo %}
+                <img src="{% url 'job_employer_photo' job.id %}" alt="Employer profile photo" data-fallback-src="{% static 'images/default-avatar.svg' %}">
+              {% elif job.employer_info.legacy_photo %}
+                <img src="data:image/jpeg;base64,{{ job.employer_info.legacy_photo }}" alt="Employer profile photo" data-fallback-src="{% static 'images/default-avatar.svg' %}">
+              {% else %}
+                <img src="{% static 'images/default-avatar.svg' %}" alt="Employer profile photo">
+              {% endif %}
+              <div class="employer-summary">
+                <strong data-user-content>{{ job.employer_info.name }}</strong>
+                <dl>
+                  <div><dt>Employer</dt><dd data-user-content>{{ job.employer_info.company_name }}</dd></div>
+                  <div><dt>Location</dt><dd data-user-content>{{ job.employer_info.location }}</dd></div>
+                  <div><dt>Contact number</dt><dd>{% if job.employer_info.phone_link %}<a data-user-content href="tel:{{ job.employer_info.phone_link }}">{{ job.employer_info.contact_number }}</a>{% elif job.employer_info.contact_number %}<span data-user-content>{{ job.employer_info.contact_number }}</span>{% else %}<span>Not provided</span>{% endif %}</dd></div>
+                </dl>
+              </div>
+              <p class="date-posted"><span>Date posted</span>{% if job.posted_at %}<time datetime="{{ job.posted_at|date:'c' }}">{{ job.posted_at|date:'M j, Y' }}</time>{% else %}<br><span>Date unavailable</span>{% endif %}</p>
+            </div>
+            <div class="job-top">
+              <div>
+                <span class="badge">{{ job.job_type }}</span>
+                <h3>{{ job.title }}</h3>
+              </div>
+              <form method="post" action="{% url 'toggle_save_job' job.id %}">
+                {% csrf_token %}
+                <button type="submit" class="save" aria-label="{% if job.id in saved_job_ids %}Unsave {{ job.title }}{% else %}Save {{ job.title }}{% endif %}">
+                  {% if job.id in saved_job_ids %}Unsave{% else %}Save job{% endif %}
+                </button>
+              </form>
+            </div>
+
+            <div style="margin:14px 0;padding:14px;border:1px solid #e0e8e2;border-radius:10px">
+              <div class="compatibility">
+                <div class="compatibility-heading">
+                  <span id="compatibility-label-{{ job.id }}">Profile compatibility</span>
+                  <span class="compatibility-score"><span>{{ job.match_score }}%</span> <span>Match</span></span>
+                </div>
+                <div class="compatibility-track" role="progressbar" aria-labelledby="compatibility-label-{{ job.id }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ job.match_score }}">
+                  <div class="compatibility-fill" data-score="{{ job.match_score }}"></div>
+                </div>
+              </div>
+              {% include 'includes/job_rating.html' %}
+              <form method="post" action="{% url 'rate_job' job.id %}">
+                {% csrf_token %}
+                <fieldset class="star-picker"><legend>Your rating</legend>
+                  {% for number in '54321' %}<input id="rating-{{ job.id }}-{{ number }}" type="radio" name="rating" value="{{ number }}" required {% if job.own_rating|stringformat:'s' == number %}checked{% endif %}><label for="rating-{{ job.id }}-{{ number }}" title="{{ number }} out of 5 stars"><span aria-hidden="true">&#9733;</span><span class="rating-label">{{ number }} out of 5 stars</span></label>{% endfor %}
+                </fieldset><button type="submit">Save</button>
+              </form>
+            </div>
+            <div class="skills" aria-label="Required skills">
+              {% for skill in job.required_skills %}
+                <span>{{ skill }}</span>
+              {% endfor %}
+            </div>
+
+            <details>
+              <summary>View job description</summary>
+              <div class="description">{{ job.description|linebreaksbr }}</div>
+            </details>
+
+            <div class="actions">
+              <span class="muted">{{ job.salary }}</span>
+              {% if job.id in applied_job_ids %}
+                <span class="badge">Application submitted</span>
+              {% else %}
+                <form method="post" action="{% url 'apply_job' job.id %}">
+                  {% csrf_token %}
+                  <button type="submit" aria-label="Apply now for {{ job.title }} at {{ job.company }}">Apply now &rarr;</button>
+                </form>
+              {% endif %}
+            </div>
+          </article>
+        {% empty %}
+          <div class="card empty">
+            <h3>No jobs match these filters.</h3>
+            <p class="muted">Try a nearby city or a broader job title. Saved jobs that have closed will not appear here.</p>
+            <a class="button" href="{% url 'jobseeker_dashboard' %}">Browse all jobs</a>
+          </div>
+        {% endfor %}
+      </section>
+
+      <aside class="right" aria-label="Sidebar information">
+        <section class="card">
+          <h3>Your profile</h3>
+          <span class="badge">{{ clearance_status }}</span>
+          <p>{{ user_data.admin_notes }}</p><a class="side-link" href="{% url 'upload_documents' %}">Documents &amp; corrections</a>
+          <p class="muted">Keep your location, skills and work experience updated so employers can understand what you offer.</p>
+          {% if user_data.admin_notes %}
+            <p class="muted">Review note: {{ user_data.admin_notes }}</p>
+          {% endif %}
+          <a class="side-link side-link-primary" href="{% url 'profile_setup' %}">Update profile</a>
+        </section>
+
+        <section class="card">
+          <h3>Application updates</h3>
+          {% for app in recent_applications %}
+            <div class="application">
+              <strong>{{ app.job_title }}</strong>
+              <span class="muted">{{ app.company_name }}<br>{{ app.status }}</span>
+            </div>
+          {% empty %}
+            <p class="muted">Your applications will appear here after you apply.</p>
+          {% endfor %}
+          <a class="side-link" href="{% url 'my_applications' %}">View all applications</a>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    document.querySelectorAll('img[data-fallback-src]').forEach(photo => {
+      const fallback = () => {
+        const src = photo.dataset.fallbackSrc;
+        if (!src) return;
+        delete photo.dataset.fallbackSrc;
+        photo.src = src;
+      };
+      photo.addEventListener('error', fallback);
+      if (photo.complete && photo.naturalWidth === 0) fallback();
+    });
+  </script>
+<script>document.querySelectorAll('.compatibility-fill').forEach(bar => {const score = Number(bar.dataset.score); const value = Number.isFinite(score) ? Math.max(0, Math.min(100, score)) : 0; bar.style.width = value + '%'; bar.parentElement.setAttribute('aria-valuenow', value);});</script>
+{% include 'includes/language_scripts.html' %}
+<script src="{% static 'js/job_ratings.js' %}" defer></script>
+</body>
+</html>

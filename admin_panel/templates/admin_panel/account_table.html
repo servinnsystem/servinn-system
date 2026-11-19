@@ -1,0 +1,138 @@
+<div class="card scroll">
+  <table>
+    <caption class="sr-only">Account Directory and Verification Reviews</caption>
+    <thead>
+      <tr>
+        <th scope="col">Account</th>
+        <th scope="col">Type</th>
+        <th scope="col">Verification</th>
+        <th scope="col">Review &amp; Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account in users %}
+        <tr>
+          <td>
+            <strong>{{ account.company_name|default:account.full_name }}</strong><br>
+            <span class="muted">{{ account.email }}</span>
+            {% if account.contact_number %}
+              <br><small class="muted">{{ account.contact_number }}</small>
+            {% endif %}
+          </td>
+          
+          <td>
+            {% if account.role == 'employer' %}
+              <span class="badge-role">Employer</span>
+            {% else %}
+              <span class="badge-role">Job seeker</span>
+            {% endif %}
+          </td>
+
+          <td>
+            <span class="status {{ account.clearance_status|lower|slugify }}">
+              {{ account.clearance_status|default:'Pending' }}
+            </span>
+            {% if account.admin_notes %}
+              <br><small class="muted">Note: {{ account.admin_notes }}</small>
+            {% endif %}
+            {% if account.reviewed_at %}
+              <br><small class="muted">Reviewed {{ account.reviewed_at|date:"M j, Y H:i" }} by {{ account.reviewed_by }}</small>
+            {% endif %}
+          </td>
+
+          <td>
+            <a class="button" style="margin-bottom:12px" href="{% url 'admin_account_profile' account.email %}">View profile</a><br>
+            {% if account.id_document_file %}
+              <a class="document-link" href="{% url 'profile_file' account.email 'id_document' %}" aria-label="Download ID document for {{ account.company_name|default:account.full_name }}">
+                Download ID
+              </a>
+            {% else %}
+              <small class="muted">No downloadable ID</small>
+            {% endif %}
+
+            <details class="review-details">
+              <summary class="review-link">Review account</summary>
+              <form method="post" action="{% url 'update_clearance_status' account.email %}" class="review-form">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="decision-{{ forloop.counter }}">Decision</label>
+                  <select id="decision-{{ forloop.counter }}" name="clearance_status" required>
+                    <option value="">Select decision</option>
+                    <option value="Verified" {% if account.clearance_status == 'Verified' %}selected{% endif %}>Verified</option>
+                    <option value="Rejected" {% if account.clearance_status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                    <option value="Correction Requested" {% if account.clearance_status == 'Correction Requested' %}selected{% endif %}>Correction Requested</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="notes-{{ forloop.counter }}">Review notes</label>
+                  <textarea id="notes-{{ forloop.counter }}" name="admin_notes" rows="3">{{ account.admin_notes }}</textarea>
+                </div>
+
+                <button type="submit" class="button" aria-label="Save verification decision for {{ account.company_name|default:account.full_name }}">
+                  Save decision
+                </button>
+              </form>
+            </details>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="4" class="empty">No accounts found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .badge-role {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #edf2ef;
+    color: #34553d;
+    font-weight: 600;
+  }
+  .document-link {
+    display: inline-block;
+    font-size: 12px;
+    text-decoration: underline;
+    margin-bottom: 8px;
+  }
+  .review-details {
+    margin-top: 6px;
+  }
+  .review-form {
+    margin-top: 10px;
+    padding: 12px;
+    background: #f8faf9;
+    border: 1px solid #e1e9e3;
+    border-radius: 8px;
+  }
+  .form-group {
+    margin-bottom: 10px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #203e34;
+  }
+  .form-group select, .form-group textarea {
+    width: 100%;
+    font-size: 12px;
+  }
+</style>

@@ -1,0 +1,317 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SERVINN | Profile Verification</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+*{box-sizing:border-box}body{margin:0;padding:45px 20px;background:#eff4ee;color:#234637;font:14px 'Segoe UI',sans-serif}.profile-container{max-width:880px;margin:auto;background:white;border:1px solid #dde7dd;border-radius:22px;padding:40px}.header-section{border-bottom:1px solid #e3eadf;padding-bottom:24px;margin-bottom:25px}h2{font-size:32px;letter-spacing:-1px;margin:12px 0}p{color:#748171;line-height:1.8}.form-group{margin-bottom:23px}label{display:block;font-weight:600;font-size:12px;margin-bottom:9px}.form-input,.form-select{width:100%;padding:13px;border:1px solid #d5dfd2;border-radius:8px;background:#fcfdfb;color:#234637;font:inherit}.form-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}.file-upload-box{padding:18px;background:#f4f8ee;border:1px dashed #a4b695;border-radius:10px}.file-upload-box input{display:block;margin-top:12px;max-width:100%;font-size:12px}.upload-text,.file-name{font-size:12px;line-height:1.7}.file-name{color:#527047;overflow-wrap:anywhere}.hidden-field{display:none!important}.btn-submit{width:100%;padding:16px;background:#315b43;color:white;border:0;border-radius:9px;font:600 14px 'Segoe UI',sans-serif;cursor:pointer}.security-note{background:#edf4db;border-radius:12px;padding:18px;margin-bottom:26px;font-size:12px;line-height:1.9}.security-note strong{display:block}.declaration{display:flex;align-items:start;gap:10px;line-height:1.8;font-weight:400;margin:25px 0}.declaration input{margin-top:5px}p[role=alert]{padding:12px;background:#f9e7df;border-radius:8px;color:#97483d}a{color:#315b43}.brand{font-size:23px;font-weight:800;letter-spacing:-1px;text-decoration:none}.form-input:focus,.form-select:focus,input:focus-visible,button:focus-visible{outline:2px solid #91ae65;outline-offset:3px}@media(max-width:650px){body{padding:15px}.profile-container{padding:24px}.form-grid-3,.form-grid-2{grid-template-columns:1fr;gap:0}h2{font-size:26px}}
+        .identity-section{border:1px solid #dde7dd;border-radius:14px;padding:22px;margin-bottom:26px;background:#fcfdfb}
+        .identity-section h3{font-size:20px;margin:0 0 8px}
+        .identity-section .identity-note{font-size:12px;margin:8px 0 14px}
+        .identity-section .form-input,.identity-section .form-select{border-radius:22px;background:white}
+        .identity-uploads{border:1px solid #e3eadf;border-radius:10px;padding:18px;background:white}
+        .identity-uploads h4{font-size:14px;margin:0 0 8px}
+        .identity-uploads h4 label{font-size:14px}
+        .identity-uploads input[type=file]{max-width:100%;font:12px 'Segoe UI',sans-serif}
+        @media(max-width:650px){.identity-section{padding:16px}.identity-uploads{padding:14px}}
+    </style>
+    {% include 'includes/skills_dropdown_assets.html' %}
+</head>
+<body>
+<div class="site-language-tools">{% include 'includes/language_picker.html' %}</div>
+
+    <div class="bg-glow-top"></div>
+    <div class="bg-glow-bottom"></div>
+
+    <div class="profile-container">
+        <div class="header-section">    
+            <div>
+                <a class="brand" href="{% url 'home' %}">{% include 'includes/brand_logo.html' %}SERVINN</a><h2>Profile</h2>
+                <p>Complete your profile details, select your account type, and provide details to proceed.</p>
+            </div>
+        </div>
+
+        {% for message in messages %}<p role="alert">{{ message }}</p>{% endfor %}
+        <form id="profile-form" method="POST" action="{% url 'create_profile' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="user_agreement" id="user-agreement-value" value="">
+
+            <!-- Account Type Selection -->
+            <div class="form-group">
+                <label for="role">Select Account Type</label>
+                <select name="role" id="role" class="form-select" onchange="toggleRoleFields(this.value)" required>
+                    <option value="job_seeker" {% if user_data.role != "employer" %}selected{% endif %}>Job Seeker</option>
+                    <option value="employer" {% if user_data.role == "employer" %}selected{% endif %}>Employer</option>
+                </select>
+            </div>
+
+            <!-- Company Name (Visible when Employer is selected) -->
+            <div class="form-group hidden-field" id="companyNameGroup">
+                <label for="companyName">Company / Business Name</label>
+                <input type="text" id="companyName" name="company_name" class="form-input" placeholder="e.g. Acme Corporation" value="{{ user_data.company_name|default_if_none:'' }}">
+            </div>
+
+            <!-- First, Middle, Last Name -->
+            <h3>Personal Information</h3>
+            <div class="form-grid-3">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" name="first_name" value="{{ user_data.first_name|default_if_none:'' }}" class="form-input" placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="middleName">Middle Name</label>
+                    <input type="text" id="middleName" name="middle_name" value="{{ user_data.middle_name|default_if_none:'' }}" class="form-input" placeholder="">
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" name="last_name" value="{{ user_data.last_name|default_if_none:'' }}" class="form-input" placeholder="" required>
+                </div>
+            </div>
+
+            <!-- Email, Contact Number, Gender -->
+            <div class="form-grid-3">
+                <div class="form-group">
+                    <label for="email">{% if request.session.login_phone %}Verified mobile number{% else %}Email Address{% endif %}</label>
+                    <input type="text" id="email" name="email" class="form-input" value="{{ request.session.login_phone|default:request.session.user_email }}" readonly placeholder="" required>
+                </div>
+                <div class="form-group">
+                    <label for="contactNumber">Contact Number</label>
+                    <input type="tel" id="contactNumber" name="contact_number" value="{{ user_data.contact_number|default_if_none:'' }}" class="form-input" placeholder="09123456789" required>
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" class="form-select" required>
+                        <option value="" disabled selected>Select Gender</option>
+                        <option value="Male" {% if user_data.gender == "Male" %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if user_data.gender == "Female" %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="dateOfBirth">Date of Birth</label>
+                    <input id="dateOfBirth" name="date_of_birth" type="date" class="form-input" value="{{ user_data.date_of_birth|default:'' }}" autocomplete="bday">
+                </div>
+                <div class="form-group">
+                    <label for="nationality">Nationality</label>
+                    <input id="nationality" name="nationality" type="text" maxlength="100" class="form-input" value="{{ user_data.nationality|default:'' }}" placeholder="Enter nationality">
+                </div>
+            </div>
+
+            <section class="identity-section" aria-labelledby="address-heading">
+                <h3 id="address-heading">Address Information</h3>
+                <div class="form-group">
+                    <label for="streetAddress">House Number / Street</label>
+                    <input id="streetAddress" name="street_address" type="text" class="form-input" maxlength="200" value="{{ user_data.street_address|default:'' }}" placeholder="House number, street, subdivision or purok" autocomplete="address-line1">
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="barangay">Barangay</label>
+                        <input id="barangay" name="barangay" type="text" class="form-input" maxlength="100" value="{{ user_data.barangay|default:'' }}" placeholder="Enter barangay" autocomplete="address-line2" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cityMunicipality">City / Municipality</label>
+                        <input id="cityMunicipality" name="city_municipality" type="text" class="form-input" maxlength="100" value="{{ user_data.city_municipality|default:'' }}" placeholder="Enter city or municipality" autocomplete="address-level2" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="province">Province</label>
+                        <input id="province" name="province" type="text" class="form-input" maxlength="100" value="{{ user_data.province|default:'' }}" placeholder="Enter province" autocomplete="address-level1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="postalCode">Postal Code (optional)</label>
+                        <input id="postalCode" name="postal_code" type="text" class="form-input" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" value="{{ user_data.postal_code|default:'' }}" placeholder="4-digit postal code" autocomplete="postal-code">
+                    </div>
+                </div>
+            </section>
+
+            <div class="form-group">
+                <label for="profilePhoto">Upload Profile Photo</label>
+                <div class="file-upload-box">
+                    <input id="profilePhoto" type="file" name="profile_photo" accept=".jpg,.jpeg,.png" required onchange="showFileName(this, 'photoFileName')">
+                    <div class="file-name" id="photoFileName"></div>
+                </div>
+            </div>
+
+            <section class="identity-section" aria-labelledby="identity-heading">
+                <h3 id="identity-heading">Identity Verification</h3>
+                <p class="identity-note">Provide clear documents for review by authorized administrators.</p>
+                <div class="form-group">
+                    <label for="idType">Select Valid ID Type</label>
+                    <select id="idType" name="id_type" class="form-select" required>
+                        <option value="" disabled {% if not user_data.id_type %}selected{% endif %}>Choose ID type</option>
+                        <option value="National ID" {% if user_data.id_type == "National ID" %}selected{% endif %}>National ID</option>
+                        <option value="Driver's License" {% if user_data.id_type == "Driver's License" %}selected{% endif %}>Driver's License</option>
+                        <option value="Passport" {% if user_data.id_type == "Passport" %}selected{% endif %}>Passport</option>
+                        <option value="UMID" {% if user_data.id_type == "UMID" %}selected{% endif %}>UMID</option>
+                        <option value="SSS" {% if user_data.id_type == "SSS" %}selected{% endif %}>SSS ID</option>
+                        <option value="PhilHealth" {% if user_data.id_type == "PhilHealth" %}selected{% endif %}>PhilHealth ID</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="idNumber">ID Number</label>
+                    <input id="idNumber" name="id_number" type="text" class="form-input" maxlength="100" value="{{ user_data.id_number|default:'' }}" placeholder="Enter ID number" autocomplete="off" required>
+                </div>
+                <div class="identity-uploads" id="idDocumentGroup">
+                    <h4>Upload Valid ID (Front and Back)</h4>
+                    <p class="identity-note">Accepted: JPG, PNG, PDF. Maximum 5 MB per file.</p>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="idFileInput">ID Front</label>
+                            <input type="file" id="idFileInput" name="id_file" accept=".jpg,.jpeg,.png,.pdf" required onchange="showFileName(this, 'idFileName')">
+                            <div class="file-name" id="idFileName"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="idBackFileInput">ID Back</label>
+                            <input type="file" id="idBackFileInput" name="id_back_file" accept=".jpg,.jpeg,.png,.pdf" required onchange="showFileName(this, 'idBackFileName')">
+                            <div class="file-name" id="idBackFileName"></div>
+                        </div>
+                    </div>
+                    <h4><label for="selfieFileInput">Upload Selfie Holding Valid ID</label></h4>
+                    <p class="identity-note">Used for identity matching by authorized administrators. JPG or PNG, up to 5 MB.</p>
+                    <input type="file" id="selfieFileInput" name="selfie_file" accept=".jpg,.jpeg,.png" required onchange="showFileName(this, 'selfieFileName')">
+                    <div class="file-name" id="selfieFileName"></div>
+                </div>
+            </section>
+
+            <!-- Upload Resume -->
+            <div class="form-group" id="resumeGroup">
+                <label>Upload Resume</label>
+                <div class="file-upload-box">
+                    <div class="upload-text">📄 Click to upload your Resume</div>
+                    <div class="file-name" id="resumeFileName"></div>
+                    <input type="file" name="resume_file" accept=".pdf" onchange="showFileName(this, 'resumeFileName')">
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="form-group skills-control" id="skillsGroup">
+                <fieldset class="skills-picker">
+                    <legend>Skills</legend>
+                    <details class="skills-dropdown">
+                    <summary><span data-skills-summary>Select skills</span></summary>
+                    <div class="skills-dropdown-menu">
+                    <div class="skills-options">
+                        {% for value, label in job_categories %}
+                        <label><input type="checkbox" name="skills" value="{{ value }}" {% if value in selected_skills %}checked{% endif %}> <span>{{ label }}</span></label>
+                        {% endfor %}
+                    </div>
+                    </div>
+                    </details>
+                </fieldset>
+                <div class="other-skills-field" data-other-skills>
+                    <label for="other-skills">Other skills (please specify)</label>
+                    <input id="other-skills" name="other_skills" type="text" maxlength="300" class="form-input" value="{{ user_data.other_skills|default:'' }}" placeholder="For example: Sewing, Computer repair">
+                    <small>Separate multiple skills with commas.</small>
+                </div>
+                <small>Select all skills that apply.</small>
+            </div>
+
+            <label class="declaration"><input type="checkbox" name="declaration" value="on" required {% if user_data.declaration %}checked{% endif %}> I confirm that these details are accurate, the uploaded ID belongs to me, and I authorize SERVINN administrators to review it for account verification.</label>
+            <button type="submit" class="btn-submit">Submit profile for review &rarr;</button>
+            <noscript>
+                {% include 'accounts/user_agreement.html' with agreement_heading_id='agreement-title-fallback' %}
+                <label class="declaration"><input type="checkbox" name="user_agreement" value="on" required> I have read and accept the SERVINN user agreement.</label>
+            </noscript>
+        </form>
+    </div>
+
+    <dialog id="user-agreement-dialog" aria-labelledby="agreement-title">
+        {% include 'accounts/user_agreement.html' %}
+        <label class="declaration"><input type="checkbox" id="agreement-confirm"> I have read and accept the SERVINN user agreement.</label>
+        <div class="agreement-actions">
+            <button type="button" id="agreement-back">Back to profile</button>
+            <button type="button" id="agreement-submit" class="btn-submit" disabled>Agree &amp; submit profile</button>
+        </div>
+        <p id="agreement-status" role="status" hidden>Submitting your profile…</p>
+    </dialog>
+    <style>
+        #user-agreement-dialog{width:min(620px,calc(100% - 32px));max-height:85vh;overflow-y:auto;border:1px solid #dde7dd;border-radius:18px;padding:28px;color:#234637;background:white}
+        #user-agreement-dialog::backdrop{background:#142e24aa}
+        #user-agreement-dialog h2{font-size:26px}
+        .agreement-copy h3{font-size:14px;margin:20px 0 6px}
+        .agreement-copy p{font-size:13px;margin:6px 0}
+        .agreement-copy h4{font-size:13px;margin:16px 0 6px}
+        .agreement-copy ul{padding-left:22px;font-size:13px;color:#748171;line-height:1.8}
+        .agreement-copy li{margin:5px 0}
+        .agreement-actions{display:flex;gap:12px;flex-wrap:wrap}
+        .agreement-actions button{flex:1;padding:13px;border:1px solid #c7d6c9;border-radius:9px;cursor:pointer;font:inherit}
+        .agreement-actions .btn-submit{background:#315b43;color:white}
+        .agreement-actions button:disabled{opacity:.5;cursor:default}
+        .skills-picker{border:1px solid #d5dfd2;border-radius:8px;padding:16px;margin:0}
+        .skills-picker legend{font-weight:600;font-size:12px;padding:0 5px}
+        .skills-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+        .skills-options label{display:flex;align-items:center;gap:8px;margin:0;font-size:13px;font-weight:400;cursor:pointer;line-height:1.6}
+        .skills-options input[type=checkbox]{width:17px;height:17px;margin:0;accent-color:#315b43;flex-shrink:0}
+    </style>
+
+    <script>
+        const profileForm = document.getElementById('profile-form');
+        const agreementDialog = document.getElementById('user-agreement-dialog');
+        const agreementConfirm = document.getElementById('agreement-confirm');
+        const agreementSubmit = document.getElementById('agreement-submit');
+        let agreementAccepted = false;
+        profileForm.addEventListener('submit', event => {
+            if (!agreementAccepted) {
+                event.preventDefault();
+                agreementConfirm.checked = false;
+                agreementSubmit.disabled = true;
+                agreementDialog.showModal();
+            }
+        });
+        agreementConfirm.addEventListener('change', () => {
+            agreementSubmit.disabled = !agreementConfirm.checked;
+        });
+        document.getElementById('agreement-back').addEventListener('click', () => agreementDialog.close());
+        agreementSubmit.addEventListener('click', () => {
+            if (!agreementConfirm.checked || agreementAccepted) return;
+            agreementAccepted = true;
+            document.getElementById('user-agreement-value').value = 'on';
+            agreementSubmit.disabled = true;
+            document.getElementById('agreement-back').disabled = true;
+            document.getElementById('agreement-status').hidden = false;
+            profileForm.requestSubmit();
+        });
+        function showFileName(input, targetId) {
+            input.setCustomValidity('');
+            if (input.files && input.files[0] && input.files[0].size > 5 * 1024 * 1024) {
+                input.setCustomValidity('Choose a file no larger than 5 MB.');
+                input.reportValidity();
+            }
+            const fileNameDisplay = document.getElementById(targetId);
+            if (input.files && input.files[0]) {
+                fileNameDisplay.textContent = 'Selected: ' + input.files[0].name;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        }
+
+        function toggleRoleFields(role) {
+            const companyGroup = document.getElementById('companyNameGroup');
+            const resumeGroup = document.getElementById('resumeGroup');
+            const skillsGroup = document.getElementById('skillsGroup');
+            skillsGroup.querySelectorAll('input').forEach(input => {
+                input.disabled = role === 'employer';
+                if (role === 'employer') input.required = false;
+            });
+            skillsGroup.dispatchEvent(new Event('skills-availability-change'));
+
+            document.getElementById('companyName').required = role === 'employer';
+            if (role === 'employer') {
+                companyGroup.classList.remove('hidden-field');
+                resumeGroup.classList.add('hidden-field');
+                skillsGroup.classList.add('hidden-field');
+            } else {
+                companyGroup.classList.add('hidden-field');
+                resumeGroup.classList.remove('hidden-field');
+                skillsGroup.classList.remove('hidden-field');
+            }
+        }
+        toggleRoleFields(document.getElementById('role').value);
+    </script>
+{% include 'includes/language_scripts.html' %}
+</body> 
+</html>

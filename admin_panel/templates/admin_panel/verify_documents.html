@@ -1,0 +1,23 @@
+{% extends 'admin_panel/base.html' %}
+
+{% block content %}
+  <a class="button" style="margin-bottom:16px" href="{% url 'admin_dashboard' %}" aria-label="Back to admin dashboard">&larr; Back</a>
+  <div class="page-header">
+    <h1>Pending profile reviews</h1>
+    <p class="muted">Review submitted information before saving a verification decision.</p>
+  </div>
+
+  {% if messages %}
+    <div class="messages-container">
+      {% for message in messages %}
+        <div class="notice {% if message.tags %}{{ message.tags }}{% endif %}" role="status">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <section aria-label="Pending user profiles table">
+    {% include 'admin_panel/account_table.html' with users=pending_users %}
+  </section>
+{% endblock %}

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SERVINN | Applicants</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #eff4f0;
+            color: #203e34;
+            font: 14px 'Segoe UI', sans-serif;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        header {
+            padding: 24px 5%;
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            border-bottom: 1px solid #dde6df;
+        }
+
+        .brand {
+            font-size: 25px;
+            font-weight: 800;
+        }
+
+        nav {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 38px auto;
+            padding: 0 24px 40px;
+        }
+
+        h1 {
+            font-size: 32px;
+            letter-spacing: -1px;
+            margin: 12px 0;
+        }
+
+        h2 {
+            font-size: 19px;
+            margin: 0 0 8px;
+        }
+
+        .muted {
+            color: #728478;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 28px 0;
+        }
+
+        .stat,
+        .card {
+            background: white;
+            border: 1px solid #dfe8e1;
+            border-radius: 13px;
+            padding: 23px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 29px;
+            margin-bottom: 8px;
+        }
+
+        .stat span {
+            font-size: 12px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .filters input {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        input,
+        select {
+            border: 1px solid #d2dfd5;
+            background: #fbfdfb;
+            border-radius: 7px;
+            padding: 12px;
+            font: 13px 'Segoe UI', sans-serif;
+            color: #203e34;
+        }
+
+        button,
+        .button {
+            padding: 12px 18px;
+            background: #315a46;
+            color: white;
+            border: 0;
+            border-radius: 7px;
+            font: 600 12px 'Segoe UI', sans-serif;
+            cursor: pointer;
+        }
+
+        .reset {
+            align-self: center;
+            font-size: 12px;
+            text-decoration: underline;
+        }
+
+        .card {
+            margin-bottom: 18px;
+        }
+
+        .candidate {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #eef0de;
+            color: #72713d;
+            font-size: 11px;
+        }
+
+        .badge.accepted {
+            background: #e0f1dd;
+            color: #3e7044;
+        }
+
+        .badge.rejected {
+            background: #f9e4e1;
+            color: #a45448;
+        }
+
+        .info {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+            font-size: 12px;
+            color: #728478;
+        }
+
+        .actions {
+            border-top: 1px solid #e7ede8;
+            padding-top: 18px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .actions label {
+            font-size: 12px;
+        }
+
+        .details {
+            margin: 20px 0;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        summary {
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            background: #f6f9f4;
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 15px;
+            overflow-wrap: anywhere;
+        }
+
+        .profile-grid strong {
+            display: block;
+        }
+
+        .profile-grid p {
+            margin: 6px 0;
+            white-space: pre-line;
+        }
+
+        .notice {
+            padding: 15px;
+            background: #e4edcf;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 45px;
+        }
+
+        a:focus-visible,
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible,
+        summary:focus-visible {
+            outline: 3px solid #8aa953;
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 650px) {
+            header,
+            .heading,
+            .candidate {
+                flex-direction: column;
+                align-items: start;
+            }
+
+            .cards {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat {
+                padding: 18px;
+            }
+
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            main {
+                padding: 0 16px 25px;
+            }
+
+            .filters > * {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="site-language-tools">{% include 'includes/language_picker.html' %}</div>
+
+<header>
+    <a class="brand" href="{% url 'employer_dashboard' %}">
+        {% include 'includes/brand_logo.html' %}SERVINN
+    </a>
+
+    <nav>
+        <a href="{% url 'employer_dashboard' %}">Dashboard</a>
+        <a href="{% url 'post_job' %}">Post a job</a>
+        <a href="{% url 'create_company' %}">Company settings</a>
+    </nav>
+</header>
+
+<main>
+
+    <div class="heading">
+        <div>
+            <span class="muted">EMPLOYER WORKSPACE</span>
+
+            <h1>Meet your next great hire.</h1>
+
+            <p class="muted">
+                Review candidates, explore their qualifications,
+                and manage your hiring decisions.
+            </p>
+        </div>
+
+        <a class="button" href="{% url 'employer_dashboard' %}">
+            &larr; Back
+        </a>
+    </div>
+
+
+    {% for message in messages %}
+        <p class="notice" role="status">
+            {{ message }}
+        </p>
+    {% endfor %}
+
+
+    <div class="cards">
+
+        {% for item in summary %}
+            <a class="stat"
+               href="?status={{ item.status|urlencode }}">
+
+                <strong>{{ item.count }}</strong>
+
+                <span>{{ item.status }}</span>
+            </a>
+        {% endfor %}
+
+    </div>
+
+
+    <form class="filters" method="get">
+
+        <input
+            name="q"
+            type="search"
+            value="{{ query }}"
+            placeholder="Candidate name, email or job title"
+            aria-label="Search candidates"
+        >
+
+        <select name="status" aria-label="Status">
+
+            <option value="">
+                All statuses
+            </option>
+
+            {% for status in statuses %}
+                <option
+                    value="{{ status }}"
+                    {% if selected_status == status %}
+                        selected
+                    {% endif %}
+                >
+                    {{ status }}
+                </option>
+            {% endfor %}
+
+        </select>
+
+        <button type="submit">
+            Apply
+        </button>
+
+        <a class="reset" href="{% url 'view_applicants' %}">
+            Reset
+        </a>
+
+    </form>
+
+
+    <p class="muted">
+        {{ page_obj.paginator.count }} matching applications
+        &middot;
+        {{ total }} total
+        &middot;
+        Newest first
+    </p>
+
+
+    {% for app in applications %}
+
+        <article class="card">
+
+            <div class="candidate">
+
+                <div>
+
+                    <h2>
+                        {{ app.applicant_name|default:'Candidate' }}
+                    </h2>
+
+                    <span class="muted">
+                        Applied for {{ app.job_title }}
+                    </span>
+
+                </div>
+
+                <span class="badge {{ app.status|slugify }}">
+                    {{ app.status }}
+                </span>
+
+            </div>
+
+
+            <div class="info">
+
+                <span>
+                    {{ app.applicant_email }}
+                </span>
+
+                <span>
+                    {{ app.location|default:'Location not provided' }}
+                </span>
+
+                <span>
+                    Profile:
+                    {{ app.clearance_status|default:'Pending' }}
+                </span>
+
+                <span>
+                    Applied:
+                    {{ app.applied_at|date:'M j, Y'|default:'Date unavailable' }}
+                </span>
+
+            </div>
+
+
+            <details class="details">
+
+                <summary>
+                    View candidate qualifications
+                </summary>
+
+                <div class="profile-grid">
+
+                    <div>
+                        <strong>Skills</strong>
+
+                        <p>
+                            {% for skill in app.skills %}
+                                {{ skill }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                Not provided
+                            {% endfor %}
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <strong>Education</strong>
+
+                        <p>
+                            {{ app.education|default:'Not provided' }}
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <strong>Work experience</strong>
+
+                        <p>
+                            {{ app.experience|default:'Not provided' }}
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <strong>Certifications</strong>
+
+                        <p>
+                            {{ app.certifications|default:'Not provided' }}
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <strong>Contact number</strong>
+
+                        <p>
+                            {{ app.contact_number|default:'Not provided' }}
+                        </p>
+                    </div>
+
+                </div>
+
+            </details>
+
+
+            <form
+                class="actions"
+                method="post"
+                action="{% url 'update_applicant_status' app.id %}"
+            >
+
+                {% csrf_token %}
+
+                <label for="status-{{ app.id }}">
+                    Review decision
+                </label>
+
+                <select
+                    id="status-{{ app.id }}"
+                    name="status"
+                    required
+                >
+
+                    <option value="">
+                        Choose a decision
+                    </option>
+
+                    
+
+                    <option value="Reviewed" {% if app.status == 'Reviewed' %}selected{% endif %}>Reviewed</option>
+                    <option value="Interview Invitation" {% if app.status == 'Interview Invitation' %}selected{% endif %}>Invite to interview</option>
+                    <option value="Hired" {% if app.status == 'Hired' %}selected{% endif %}>Hired</option>
+                    <option value="Shortlisted" {% if app.status == "Shortlisted" %}selected{% endif %}>Shortlist</option>
+                    <option
+                        value="Accepted"
+                        {% if app.status == 'Accepted' %}
+                            selected
+                        {% endif %}
+                    >
+                        Accept
+                    </option>
+
+                    <option
+                        value="Rejected"
+                        {% if app.status == 'Rejected' %}
+                            selected
+                        {% endif %}
+                    >
+                        Reject
+                    </option>
+
+                </select>
+
+                <label>Message to candidate <textarea name="candidate_message" maxlength="1500">{{ app.candidate_message }}</textarea></label>
+                <label>Interview date/time (Asia/Manila) <input type="datetime-local" name="interview_at" value="{{ app.interview_at|date:'Y-m-d\TH:i' }}"></label>
+                <label>Interview address or meeting link <input name="interview_location" maxlength="500" value="{{ app.interview_location }}"></label>
+                <button type="submit">
+                    Save decision
+                </button>
+
+            </form>
+
+        </article>
+
+    {% empty %}
+
+        <section class="card empty">
+
+            <h2>
+                No applications found.
+            </h2>
+
+            <p class="muted">
+                Try a different search or clear the status filter.
+                Applications will appear here when candidates apply
+                to your jobs.
+            </p>
+
+        </section>
+    {% endfor %}
+
+
+    <div class="pagination">
+
+        <span class="muted">
+            Page {{ page_obj.number }}
+            of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        <div>
+
+            {% if page_obj.has_previous %}
+
+                <a
+                    class="button"
+                    href="?{{ filter_query }}&amp;page={{ page_obj.previous_page_number }}"
+                >
+                    Previous
+                </a>
+
+            {% endif %}
+
+
+            {% if page_obj.has_next %}
+
+                <a
+                    class="button"
+                    href="?{{ filter_query }}&amp;page={{ page_obj.next_page_number }}"
+                >
+                    Next
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</main>
+
+{% include 'includes/language_scripts.html' %}
+</body>
+</html>

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About Us | SERVINN{% endblock %}
+
+{% block content %}
+<div class="container my-5" style="max-width: 900px;">
+    <!-- Hero Header -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-primary mb-3">About SERVINN</h1>
+        <p class="lead text-muted">
+            Empowering service professionals and domestic workers across the Philippines through secure, verified, and direct employment opportunities.
+        </p>
+    </div>
+
+    <!-- Platform Mission -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+        <h3 class="fw-bold mb-3">Our Mission</h3>
+        <p>
+            SERVINN is a dedicated job-matching and clearance audit platform designed to bridge the gap between skilled service workers and verified employers. By digitizing background checks, document clearances, and skills matching, we make employment safer, faster, and more transparent.
+        </p>
+    </div>
+
+    <!-- Key Features -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center">
+                <div class="fs-1 mb-2">🛡️</div>
+                <h5 class="fw-bold">Verified Profiles</h5>
+                <p class="small text-muted mb-0">NBI, Police, and Barangay clearance verification for safe hiring.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center">
+                <div class="fs-1 mb-2">⚡</div>
+                <h5 class="fw-bold">Smart Cross-Matching</h5>
+                <p class="small text-muted mb-0">Directly pairs workers and employers based on skills, rate, and location.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 text-center">
+                <div class="fs-1 mb-2">🤝</div>
+                <h5 class="fw-bold">Direct Opportunities</h5>
+                <p class="small text-muted mb-0">Fair, transparent connections with zero agency cut fees.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Box -->
+    <div class="card border-0 bg-light rounded-4 p-4 text-center">
+        <h4 class="fw-bold mb-2">Need Assistance?</h4>
+        <p class="text-muted mb-3">Reach out to our platform support team for verification assistance or general inquiries.</p>
+        <div>
+            <a href="mailto:support@servinn.ph" class="btn btn-primary px-4 py-2 rounded-pill">Contact Support</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,386 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SERVINN | Find work. Find your people.</title>
+<meta name="description" content="Connect with employers, discover job opportunities, and take your next career step with SERVINN.">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--green:#254b3e;--lime:#d2fa43;--muted:#687970;--cream:#f7f9f2;--line:#e1e8dd}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--cream);color:var(--green);font:14px 'Plus Jakarta Sans',sans-serif}
+a{color:inherit;text-decoration:none}
+a:focus-visible,summary:focus-visible{outline:3px solid #77942b;outline-offset:5px}
+.wrap{max-width:1200px;margin:auto;padding:0 36px}
+header{border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:25px;min-height:94px}
+.brand{font-size:25px;font-weight:800;letter-spacing:-1px;display:flex;align-items:center;gap:10px}
+.brand-logo{width:48px;height:48px;object-fit:cover;border-radius:50%;flex-shrink:0;display:block}
+.nav-links,.nav-actions{display:flex;align-items:center;gap:27px;font-size:12px;font-weight:600}
+.button{display:inline-flex;align-items:center;justify-content:center;gap:20px;border-radius:8px;padding:16px 23px;background:var(--green);color:white;font-size:12px;font-weight:700;transition:transform .2s}
+.button:hover{transform:translateY(-2px)}
+.button.light{background:var(--lime);color:var(--green)}
+.button.outline{background:transparent;border:1px solid #bdcbbb;color:var(--green)}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:60px;align-items:center;padding-top:85px;padding-bottom:80px}
+.eyebrow{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:2px;display:block;margin-bottom:23px}
+.eyebrow:before{content:'';display:inline-block;width:7px;height:7px;background:#77ac42;border-radius:50%;margin-right:9px}
+h1{font-size:clamp(42px,5.3vw,69px);line-height:1.09;letter-spacing:-3px;margin:0 0 25px;font-weight:700}
+h1 em{font-style:normal;background:linear-gradient(transparent 64%,var(--lime) 64%)}
+.lead{font-size:15px;color:var(--muted);line-height:1.9;max-width:450px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin:28px 0 23px}
+.small{font-size:11px;color:var(--muted);line-height:1.8}
+.hero-art{position:relative;background:#dce8d3;border-radius:160px 160px 24px 24px;padding:48px 27px 30px;min-height:415px;display:flex;flex-direction:column;justify-content:center;gap:16px}
+.orbit{position:absolute;width:260px;height:260px;border:1px solid #bbcea9;border-radius:50%;top:28px;right:30px}
+.opportunity{position:relative;background:white;border:1px solid #e7eee1;border-radius:16px;padding:24px;box-shadow:0 14px 30px #27453109}
+.opportunity.top{transform:rotate(-4deg);margin-right:30px}
+.opportunity.bottom{margin-left:35px;transform:rotate(3deg)}
+.card-heading{display:flex;gap:13px;align-items:center}
+.tile{display:grid;place-items:center;background:#eff6de;width:43px;height:43px;border-radius:12px;font-size:22px}
+.opportunity h3{font-size:15px;margin:0 0 5px}
+.opportunity p{font-size:11px;color:var(--muted);margin:0}
+.tags{display:flex;gap:7px;margin-top:18px}
+.tag{background:#f3f6ee;border-radius:20px;padding:7px 10px;font-size:9px}
+.art-label{position:relative;align-self:center;background:var(--green);color:white;padding:13px 20px;border-radius:30px;font-size:11px}
+.art-caption{position:relative;text-align:center;font-size:10px;color:var(--muted)}
+.strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:24px;padding:26px 0;font-size:12px;font-weight:600}
+.strip span:before{content:'\2713';margin-right:10px;color:#709441}
+.section{padding-top:80px;padding-bottom:80px}
+.section-heading{display:flex;justify-content:space-between;align-items:end;gap:30px;margin-bottom:32px}
+h2{font-size:36px;letter-spacing:-1.3px;line-height:1.2;margin:0}
+h3{font-size:17px;margin:0 0 13px}
+.section-heading p{max-width:320px;margin:0;color:var(--muted);line-height:1.8}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.step{padding:30px;background:white;border:1px solid var(--line);border-radius:14px}
+.step-number{width:39px;height:39px;display:grid;place-items:center;border-radius:50%;background:var(--lime);font-size:12px;font-weight:700;margin-bottom:24px}
+.step p{color:var(--muted);line-height:1.9;font-size:12px;margin:0}
+.employer{background:var(--green);color:white;border-radius:20px;padding:50px;display:grid;grid-template-columns:1.3fr 1fr;gap:60px;align-items:center}
+.employer p{color:#c3d3c8;font-size:13px;line-height:1.9;margin:20px 0 27px}
+.employer-list{display:grid;gap:12px}
+.employer-feature{padding:20px;border:1px solid #507261;border-radius:10px;font-size:13px}
+.employer-feature span{color:var(--lime);margin-right:12px}
+.faq{max-width:760px;margin:auto}
+.faq h2{text-align:center;margin-bottom:30px}
+details{border-bottom:1px solid var(--line);padding:22px 0}
+summary{cursor:pointer;font-weight:600;font-size:14px}
+details p{color:var(--muted);line-height:1.9;padding-right:25px}
+.closing{text-align:center;padding:55px 20px;background:#eaf0de;border-radius:20px;margin-bottom:70px}
+.closing p{color:var(--muted);margin:18px 0 25px}
+footer{border-top:1px solid var(--line);padding:30px 0}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.footer-links{display:flex;gap:20px;font-size:11px}
+.notice{padding:15px;background:#eaf0de;border-radius:8px;margin-top:20px}
+
+@media(max-width:850px){
+.nav-links{display:none}
+.hero{gap:30px}
+.hero-art{padding:35px 15px}
+.steps{gap:12px}
+.step{padding:22px}
+.employer{gap:30px;padding:35px}
+}
+
+@media(max-width:650px){
+.wrap{padding-left:22px;padding-right:22px}
+.nav{min-height:80px}
+.nav-actions{gap:12px}
+.nav-actions .button{padding:12px}
+.brand{font-size:21px}
+.hero{grid-template-columns:1fr;padding-top:45px;padding-bottom:45px}
+.hero-art{min-height:350px;max-width:450px;width:100%;margin:auto}
+h1{letter-spacing:-2px}
+.strip{flex-direction:column;gap:16px}
+.steps,.employer{grid-template-columns:1fr}
+.section{padding-top:50px;padding-bottom:50px}
+.section-heading{display:block}
+.section-heading p{margin-top:20px}
+h2{font-size:29px}
+.footer-inner{align-items:start;flex-direction:column}
+.closing{margin-bottom:45px}
+}
+
+@media(prefers-reduced-motion:reduce){
+html{scroll-behavior:auto}
+.button{transition:none}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<div class="wrap nav">
+<a href="{% url 'home' %}" class="brand">
+<img class="brand-logo" src="{% static 'images/servinn-logo.png.jpg' %}" alt="" width="48" height="48">SERVINN
+</a>
+
+<nav class="nav-links" aria-label="Main navigation">
+<a href="#how-it-works">How it works</a>
+<a href="#employers">For employers</a>
+<a href="#questions">FAQs</a>
+</nav>
+
+<div class="nav-actions">
+{% include 'includes/language_picker.html' %}
+{% if request.session.user_role == 'employer' %}
+<a class="button" href="{% url 'employer_dashboard' %}">My dashboard &rarr;</a>
+{% elif request.session.user_role == 'job_seeker' %}
+<a class="button" href="{% url 'jobseeker_dashboard' %}">My dashboard &rarr;</a>
+{% elif request.session.user_role == 'admin' %}
+<a class="button" href="{% url 'admin_dashboard' %}">Admin dashboard &rarr;</a>
+{% else %}
+<a href="{% url 'login' %}">Sign in</a>
+<a class="button" href="{% url 'register' %}">Get started &rarr;</a>
+{% endif %}
+</div>
+</div>
+</header>
+
+<main>
+<div class="wrap">
+
+{% for message in messages %}
+<p class="notice" role="status">{{ message }}</p>
+{% endfor %}
+
+<section class="hero" lang="hil">
+
+<div>
+<span class="eyebrow">Diri nagasugod ang imo bag-o nga kapitulo</span>
+
+<h1>
+Sa SERVINN,<br>
+Ang imo abilidad may padulungan.<br>
+<em>Konektado ang abilidad kag oportunidad.</em>
+</h1>
+
+<p class="lead">
+Pangitaa ang mga oportunidad diin magamit mo ang imo mga ikasarang. Ginapaangot sang SERVINN ang mga nagapangita sang trabaho kag ang mga employer.
+</p>
+
+<div class="hero-actions">
+<a class="button" href="{% url 'jobseeker_dashboard' %}">
+Jobseeker <span aria-hidden="true">&rarr;</span>
+</a>
+
+<a class="button outline" href="#employers">
+Employer <span aria-hidden="true">&#8599;</span>
+</a>
+</div>
+
+<p class="small">
+Himua ang imo profile. Usisaa ang mga oportunidad. Himua ang masunod nga tikang.
+</p>
+</div>
+
+<div class="hero-art" aria-label="Usisaa ang mga oportunidad kag makig-angot sa mga employer">
+
+<div class="orbit" aria-hidden="true"></div>
+
+<div class="opportunity top">
+<div class="card-heading">
+<span class="tile" aria-hidden="true">&#10022;</span>
+
+<div>
+<h3>Imo ikasarang, bag-o nga mga posibilidad.</h3>
+<p>Maghimo sang profile nga nagasugid sang imo istorya.</p>
+</div>
+</div>
+
+<div class="tags">
+<span class="tag">Eksperyensya</span>
+<span class="tag">Mga ikasarang</span>
+<span class="tag">Handum</span>
+</div>
+</div>
+
+<div class="opportunity bottom">
+<div class="card-heading">
+<span class="tile" aria-hidden="true">&#8599;</span>
+
+<div>
+<h3>Ang imo masunod nga oportunidad.</h3>
+<p>Pangita sang trabaho. Makig-angot.</p>
+</div>
+</div>
+
+<div class="tags">
+<span class="tag">Bug-os nga oras</span>
+<span class="tag">Part-time nga trabaho</span>
+<span class="tag">Kontrata</span>
+</div>
+</div>
+
+<span class="art-label">Mas maayo nga paagi sa pag-uswag.</span>
+<span class="art-caption">Para sa mga nagapangita sang trabaho kag nagatubo nga mga grupo.</span>
+
+</div>
+</section>
+
+<div class="strip">
+<span>Discover employer job postings</span>
+<span>Apply with your profile</span>
+<span>Follow your application status</span>
+</div>
+
+<section class="section" id="how-it-works" lang="hil">
+
+<div class="section-heading">
+<div>
+<span class="eyebrow">Simple nga mga tikang. Matuod nga mga oportunidad.</span>
+
+<h2>
+Halin sa pagpangita<br>pakadto sa imo bag-o nga pagsugod.
+</h2>
+</div>
+
+<p>
+Mas mahapos nga proseso agod mas makatutok ka sa pagpangita sang nagakaigo nga oportunidad.
+</p>
+</div>
+
+<div class="steps">
+
+<article class="step">
+<span class="step-number">01</span>
+<h3>Himua ang imo profile</h3>
+<p>
+Maghimo sang account, kompletuha ang imo profile, kag ipaambit ang imo mga ikasarang kag eksperyensya.
+</p>
+</article>
+
+<article class="step">
+<span class="step-number">02</span>
+<h3>Pangitaa ang imo oportunidad</h3>
+<p>
+Tan-awa ang mga bakante nga trabaho kag magpangita suno sa posisyon, kompanya, ukon lugar agod makita ang trabaho nga nagakaigo sa imo.
+</p>
+</article>
+
+<article class="step">
+<span class="step-number">03</span>
+<h3>Himua ang masunod nga tikang</h3>
+<p>
+Mag-apply sing direkta kag tan-awa ang "My Applications" agod masundan ang kahimtangan sang imo aplikasyon samtang ginarepaso ini sang mga employer.
+</p>
+</article>
+
+</div>
+</section>
+
+<section class="employer" id="employers">
+
+<div>
+<span class="eyebrow">For the teams building tomorrow</span>
+
+<h2>
+Your next great hire<br>
+starts with a hello.
+</h2>
+
+<p>
+Introduce your company, publish an opportunity, and manage incoming applications in one employer dashboard.
+</p>
+
+<a class="button light" href="{% url 'login' %}?role=employer">
+employer &rarr;
+</a>
+
+<p class="small">
+New to SERVINN?
+<a href="{% url 'register' %}?role=employer">
+<u>Create an account</u>
+</a>
+and select Employer during profile setup.
+</p>
+</div>
+
+<div class="employer-list">
+
+<div class="employer-feature">
+<span>01</span>
+Build your company profile
+</div>
+
+<div class="employer-feature">
+<span>02</span>
+Publish jobs for candidates to discover
+</div>
+
+<div class="employer-feature">
+<span>03</span>
+Review applicants and track decisions
+</div>
+
+</div>
+</section>
+
+<section class="section faq" id="questions" lang="hil">
+
+<h2>Mga butang nga dapat mo mahibaluan.</h2>
+
+<details>
+<summary>Paano ako maka-apply sa trabaho?</summary>
+<p>
+Maghimo sang account kag kompletuha ang imo profile. Buksi ang imo job seeker dashboard, pangitaa ang trabaho nga gusto mo, kag pilia ang "Apply Now".
+</p>
+</details>
+
+<details>
+<summary>Paano ako makahimo sang employer account?</summary>
+<p>
+Magparehistro, dayon pilia ang "Employer" sa pagkompleto sang imo profile kag isulod ang mga detalye sang imo kompanya. Sa imo employer dashboard, mahimo ka mag-post sang mga bakante nga trabaho kag magdumala sang mga aplikasyon.
+</p>
+</details>
+
+<details>
+<summary>Diin ko makita ang kahimtangan sang akon aplikasyon?</summary>
+<p>
+Mag-sign in sa imo job seeker account kag buksi ang "My Applications" agod makita ang kahimtangan sang mga aplikasyon nga imo ginpasa.
+</p>
+</details>
+
+</section>
+
+<section class="closing">
+
+<h2>Your next chapter is waiting.</h2>
+
+<p>
+Bring your skills. Find your people. Get started with SERVINN.
+</p>
+
+<a class="button" href="{% url 'register' %}">
+Create your account &rarr;
+</a>
+
+</section>
+
+</div>
+</main>
+
+<footer>
+
+<div class="wrap footer-inner">
+
+<a class="brand" href="{% url 'home' %}">
+<img class="brand-logo" src="{% static 'images/servinn-logo.png.jpg' %}" alt="" width="48" height="48">SERVINN
+</a>
+
+<span class="small">
+&copy; {% now 'Y' %} SERVINN. Connecting people and opportunities.
+</span>
+
+<nav class="footer-links" aria-label="Footer navigation">
+<a href="#how-it-works">How it works</a>
+<a href="{% url 'login' %}">Sign in</a>
+</nav>
+
+</div>
+</footer>
+
+{% include 'includes/language_scripts.html' %}
+</body>
+</html>

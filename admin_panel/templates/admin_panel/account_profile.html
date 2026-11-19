@@ -1,0 +1,53 @@
+{% extends 'admin_panel/base.html' %}
+{% block content %}
+<style>
+  .profile-heading{display:flex;align-items:center;gap:20px;margin:24px 0;overflow-wrap:anywhere}
+  .profile-heading img{width:88px;height:88px;object-fit:cover;border-radius:18px}
+  .profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+  .profile-grid dl{margin:0}.profile-grid dt{font-size:12px;color:#718479;margin-top:18px}
+  .profile-grid dd{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+  .profile-review label{display:block;margin:16px 0 6px}.profile-review textarea{width:100%}
+  @media(max-width:850px){.profile-grid{grid-template-columns:1fr}}
+</style>
+<a href="{% url 'manage_users' %}">&larr; Back to accounts</a>
+<div class="profile-heading">
+  {% if account.profile_photo_file %}<img src="{% url 'profile_file' account_id 'profile_photo' %}" alt="Profile photo">{% endif %}
+  <div><h1>{{ display_name }}</h1>
+    <p>{% if account.role == 'employer' %}Employer{% else %}Job seeker{% endif %} &middot;
+    <span class="status {{ account.clearance_status|default:'Pending'|slugify }}">{{ account.clearance_status|default:'Pending' }}</span></p>
+  </div>
+</div>
+<div class="profile-grid">
+  {% for section in sections %}
+  <section class="card"><h2>{{ section.title }}</h2><dl>
+    {% for row in section.rows %}<dt>{{ row.label }}</dt><dd>{{ row.value }}</dd>{% endfor %}
+  </dl></section>
+  {% endfor %}
+  <section class="card"><h2>Documents &amp; account status</h2>
+    {% if account.nbi_clearance_file %}<p><a href="{% url 'profile_file' account_id 'nbi_clearance' %}">Download NBI clearance</a></p>{% endif %}
+    {% if account.police_clearance_file %}<p><a href="{% url 'profile_file' account_id 'police_clearance' %}">Download police clearance</a></p>{% endif %}
+    {% if account.barangay_clearance_file %}<p><a href="{% url 'profile_file' account_id 'barangay_clearance' %}">Download barangay clearance</a></p>{% endif %}
+    <p>Profile setup: {{ account.profile_completed|yesno:'Complete,Incomplete' }}</p>
+    <p>Phone verified: {{ account.phone_verified|yesno:'Yes,No' }}</p>
+    <p>ID type: {{ account.id_type|default:'Not provided' }}</p>
+    <p>{% if account.id_document_file %}<a href="{% url 'profile_file' account_id 'id_document' %}">Download ID document</a>{% else %}No downloadable ID document.{% endif %}</p>
+    {% if account.id_document_back_file %}<p><a href="{% url 'profile_file' account_id 'id_document_back' %}">Download ID back</a></p>{% endif %}
+    {% if account.selfie_document_file %}<p><a href="{% url 'profile_file' account_id 'selfie_document' %}">Download selfie holding ID</a></p>{% endif %}
+    <p>{% if account.resume_document_file %}<a href="{% url 'profile_file' account_id 'resume_document' %}">Download resume</a>{% else %}No resume uploaded.{% endif %}</p>
+  </section>
+  <section class="card profile-review"><h2>Verification review</h2>
+    {% if account.reviewed_at %}<p class="muted">Last reviewed {{ account.reviewed_at|date:'M j, Y H:i' }} by {{ account.reviewed_by }}</p>{% endif %}
+    <form method="post" action="{% url 'update_clearance_status' account_id %}">
+      {% csrf_token %}
+      <label for="decision">Decision</label>
+      <select id="decision" name="clearance_status" required>
+        <option value="">Choose a decision</option><option value="Verified">Verified</option>
+        <option value="Correction Requested">Correction requested</option><option value="Rejected">Rejected</option>
+      </select>
+      <label for="notes">Review notes</label>
+      <textarea id="notes" name="admin_notes" rows="4">{{ account.admin_notes }}</textarea>
+      <p><button type="submit">Save decision</button></p>
+    </form>
+  </section>
+</div>
+{% endblock %}

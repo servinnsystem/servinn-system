@@ -1,0 +1,136 @@
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<p id="social-auth-status" role="status" aria-live="polite" style="text-align:center"></p>
+<button type="button" id="social-auth-redirect" class="btn-google" hidden>Continue with Google in this tab</button>
+<style>#social-auth-redirect[hidden]{display:none}</style>
+<script>
+(() => {
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJs9yYKwWYLlQ4IBU2nhObD5tArQl3lyg",
+            authDomain: "servinnsystem-bf596.firebaseapp.com",
+            databaseURL: "https://servinnsystem-bf596-default-rtdb.firebaseio.com",
+            projectId: "servinnsystem-bf596",
+            storageBucket: "servinnsystem-bf596.firebasestorage.app",
+            messagingSenderId: "1047995760124",
+            appId: "1:1047995760124:web:aba4f8f6eabb0961d74679",
+            measurementId: "G-2KX88DJZML"
+        };
+
+
+    window.servinnFirebaseConfig = firebaseConfig;
+    const buttons = document.querySelectorAll('[data-social-provider]');
+    const status = document.getElementById('social-auth-status');
+    const redirectButton = document.getElementById('social-auth-redirect');
+    const redirectKey = 'servinn-google-redirect';
+    let busy = false;
+    const errors = {
+        'auth/operation-not-allowed': 'Google sign-in is not enabled yet. Enable Google in Firebase Authentication > Sign-in method.',
+        'auth/unauthorized-domain': 'This website address is not authorized for sign-in. Add localhost and 127.0.0.1 to Firebase Authentication > Settings > Authorized domains.',
+        'auth/popup-blocked': 'Your browser blocked the Google window. Allow popups or choose “Continue with Google in this tab”.',
+        'auth/web-storage-unsupported': 'Your browser must allow website storage to use Google sign-in.',
+        'auth/account-exists-with-different-credential': 'This email already uses another sign-in method. Please use your original provider.',
+        'auth/network-request-failed': 'Unable to connect. Check your internet connection and try again.',
+        'auth/invalid-api-key': 'The sign-in service is not configured correctly. Please contact the SERVINN administrator.',
+        'auth/operation-not-supported-in-this-environment': 'Open SERVINN using http://localhost:8000 or its HTTPS website to continue.'
+    };
+    function setBusy(value) {
+        busy = value;
+        [...buttons, redirectButton].forEach(item => {
+            item.disabled = value;
+            item.setAttribute('aria-disabled', String(value));
+        });
+    }
+    function getAuth() {
+        if (!window.firebase) throw new Error('The sign-in service could not load. Check your connection and reload the page.');
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        auth.useDeviceLanguage();
+        return auth;
+    }
+    function googleProvider() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({prompt: 'select_account'});
+        return provider;
+    }
+    function showError(error) {
+        const interrupted = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request'].includes(error.code);
+        redirectButton.hidden = false;
+        status.textContent = interrupted
+            ? 'The Google window closed before sign-in finished. Keep it open until you select your account, or continue in this tab below.'
+            : (errors[error.code] || error.message || 'Sign-in failed. Please try again.');
+    }
+    async function finish(auth, result, query) {
+        try {
+            status.textContent = 'Sending a verification code to your email…';
+            const token = await result.user.getIdToken();
+            const endpoint = "{% url 'google_login' %}";
+            const response = await fetch(endpoint + query, {
+                method: 'POST', credentials: 'same-origin',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('input[name="csrfmiddlewaretoken"]').value},
+                body: JSON.stringify({id_token: token})
+            });
+            let data;
+            try { data = await response.json(); }
+            catch (_) { throw new Error('Unable to complete sign-in. Refresh this page and try again.'); }
+            if (!response.ok || !data.redirect_url) throw new Error(data.message || 'Sign-in failed. Please try again.');
+            return data.redirect_url;
+        } finally {
+            try { await auth.signOut(); } catch (_) {}
+        }
+    }
+    buttons.forEach(button => button.addEventListener('click', async event => {
+        event.preventDefault();
+        if (busy) return;
+        setBusy(true);
+        status.textContent = 'Choose your Google account in the window that opens…';
+        try {
+            const auth = getAuth();
+            // Start directly in the click handler so the browser recognizes the user gesture.
+            const result = await auth.signInWithPopup(googleProvider());
+            const destination = await finish(auth, result, window.location.search);
+            window.location.assign(destination);
+        } catch (error) { showError(error); }
+        finally { setBusy(false); }
+    }));
+
+    redirectButton.addEventListener('click', async () => {
+        if (busy) return;
+        setBusy(true);
+        status.textContent = 'Opening Google in this tab…';
+        try {
+            sessionStorage.setItem(redirectKey, JSON.stringify({query: window.location.search, started: Date.now()}));
+            const auth = getAuth();
+            await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+            await auth.signInWithRedirect(googleProvider());
+        } catch (error) {
+            try { sessionStorage.removeItem(redirectKey); } catch (_) {}
+            showError(error);
+            setBusy(false);
+        }
+    });
+
+    async function resumeRedirect() {
+        let pending;
+        try {
+            const raw = sessionStorage.getItem(redirectKey);
+            if (!raw) return;
+            pending = JSON.parse(raw);
+            sessionStorage.removeItem(redirectKey);
+        } catch (_) { return; }
+        if (!pending.started || Date.now() - pending.started > 10 * 60 * 1000) return;
+        setBusy(true);
+        status.textContent = 'Completing Google sign-in…';
+        try {
+            const auth = getAuth();
+            const result = await auth.getRedirectResult();
+            if (!result || !result.user) {
+                throw new Error('Google did not return a sign-in result. Try the Google popup again with popups and website storage allowed.');
+            }
+            const destination = await finish(auth, result, typeof pending.query === 'string' ? pending.query : '');
+            window.location.assign(destination);
+        } catch (error) { showError(error); }
+        finally { setBusy(false); }
+    }
+    resumeRedirect();
+})();
+</script>

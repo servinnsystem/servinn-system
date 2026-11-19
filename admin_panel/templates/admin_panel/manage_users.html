@@ -1,0 +1,146 @@
+{% extends 'admin_panel/base.html' %}
+
+{% block content %}
+  <a class="button" style="margin-bottom:16px" href="{% url 'admin_dashboard' %}" aria-label="Back to admin dashboard">&larr; Back</a>
+  <div class="page-header">
+    <h1>Account directory</h1>
+    <p class="subtitle">Review profiles and keep your job seeker and employer records organized.</p>
+  </div>
+
+  {% if messages %}
+    <div class="messages-container" role="status">
+      {% for message in messages %}
+        <div class="notice {% if message.tags %}{{ message.tags }}{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <section aria-label="Account metrics overview">
+    <dl class="cards">
+      <div class="card">
+        <dt class="label">Total accounts</dt>
+        <dd class="value">{{ stats.total }}</dd>
+      </div>
+
+      <div class="card">
+        <dt class="label">Job seekers</dt>
+        <dd class="value">{{ stats.seekers }}</dd>
+      </div>
+
+      <div class="card">
+        <dt class="label">Employers</dt>
+        <dd class="value">{{ stats.employers }}</dd>
+      </div>
+
+      <div class="card">
+        <dt class="label">Awaiting review</dt>
+        <dd class="value">{{ stats.pending }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <form class="filters" method="get" role="search" aria-label="Filter accounts">
+    <div class="field">
+      <label for="search-input" class="sr-only">Search accounts</label>
+      <input type="search" id="search-input" name="q" value="{{ query }}" aria-label="Search accounts" placeholder="Search name, company or email">
+    </div>
+
+    <div class="field">
+      <label for="role-select" class="sr-only">Account type</label>
+      <select id="role-select" name="role" aria-label="Account type">
+        <option value="">All account types</option>
+        <option value="job_seeker" {% if selected_role == 'job_seeker' %}selected{% endif %}>Job seekers</option>
+        <option value="employer" {% if selected_role == 'employer' %}selected{% endif %}>Employers</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="status-select" class="sr-only">Verification status</label>
+      <select id="status-select" name="status" aria-label="Verification status">
+        <option value="">All verification statuses</option>
+        {% for status in statuses %}
+          <option {% if selected_status == status %}selected{% endif %}>{{ status }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button type="submit" class="button">Apply</button>
+    <a class="reset" href="{% url 'manage_users' %}">Reset filters</a>
+  </form>
+
+  <p class="muted" aria-live="polite">
+    {{ page_obj.paginator.count }} matching account{{ page_obj.paginator.count|pluralize }}
+  </p>
+
+  <section aria-label="Account directory list">
+    {% include 'admin_panel/account_table.html' %}
+  </section>
+
+  {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="pagination" aria-label="Directory pagination">
+      <span class="muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+      <div>
+        {% if page_obj.has_previous %}
+          <a class="button" href="?{{ filter_query }}&amp;page={{ page_obj.previous_page_number }}" aria-label="Go to previous page">Previous</a>
+        {% endif %}
+        {% if page_obj.has_next %}
+          <a class="button" href="?{{ filter_query }}&amp;page={{ page_obj.next_page_number }}" aria-label="Go to next page">Next</a>
+        {% endif %}
+      </div>
+    </nav>
+  {% endif %}
+
+  <style>
+    .page-header {
+      margin-bottom: 24px;
+    }
+    .subtitle {
+      color: #718278;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 0 0 24px 0;
+      padding: 0;
+      list-style: none;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e0e8e1;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 6px;
+    }
+    .card .label {
+      font-size: 12px;
+      color: #718278;
+      font-weight: 500;
+      margin: 0;
+    }
+    .card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #203e34;
+      margin: 0;
+      line-height: 1.1;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+{% endblock %}

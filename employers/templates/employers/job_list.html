@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Jobs & Candidates</title>
+    <style>
+        body { font-family: sans-serif; background: #fafbfc; padding: 30px; }
+        .search-container { max-width: 900px; margin: 0 auto 30px auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .search-form { display: flex; gap: 10px; }
+        .search-input { flex: 1; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
+        .btn-search { padding: 10px 24px; background: #0d9488; color: #fff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
+        .job-list { max-width: 900px; margin: auto; display: flex; flex-direction: column; gap: 12px; }
+        .job-card { background: #fff; padding: 18px; border-radius: 10px; border: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .job-location { display: inline-block; padding: 4px 8px; background: #e0f2fe; color: #0369a1; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="site-language-tools">{% include 'includes/language_picker.html' %}</div>
+
+    <div class="search-container">
+        <form method="GET" action="." class="search-form">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by Job Role or Keyword..." class="search-input">
+            <input type="text" name="location" value="{{ location_filter }}" placeholder="Location (e.g. Manila, Remote)" class="search-input">
+            <button type="submit" class="btn-search">Search Jobs</button>
+        </form>
+    </div>
+
+    <div class="job-list">
+        {% for job in jobs %}
+            <div class="job-card">
+                <div>
+                    <h3 style="margin: 0 0 6px 0;">{{ job.title }}</h3>
+                    <p style="margin: 0 0 8px 0; color: #666; font-size: 0.88rem;">{{ job.company_name }}</p>
+                    <span class="job-location">📍 {{ job.location }}</span>
+                    {% if job.is_remote %}<span class="job-location" style="background:#fef3c7; color:#b45309;">🏠 Remote Available</span>{% endif %}
+                </div>
+                <a href="{% url 'job_detail' job.id %}" style="padding: 8px 16px; border: 1px solid #333; background: #fff; border-radius: 6px;">View Details</a>
+            </div>
+        {% empty %}
+            <p style="text-align: center; color: #777;">No jobs found matching your search location or keywords.</p>
+        {% endfor %}
+    </div>
+
+{% include 'includes/language_scripts.html' %}
+</body>
+</html>

@@ -1,0 +1,195 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SERVINN | My professional profile</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#eff4f0;color:#203e34;font:14px 'Segoe UI',sans-serif}
+    a{color:inherit;text-decoration:none}
+    header{background:white;border-bottom:1px solid #e0e8e1;padding:24px 5%;display:flex;justify-content:space-between;align-items:center;gap:20px}
+    .brand{font-size:25px;font-weight:800;letter-spacing:-1px}
+    .brand span{color:#86a939}
+    nav{display:flex;gap:24px;font-size:12px}
+    main{max-width:1140px;margin:40px auto;padding:0 24px 35px}
+    h1{font-size:32px;letter-spacing:-1px;margin:10px 0}
+    h2{font-size:18px;margin:0}
+    .muted{color:#718278;line-height:1.8;font-size:12px}
+    .eyebrow{text-transform:uppercase;letter-spacing:1.5px;font-size:10px;color:#718278}
+    .layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:24px;margin-top:28px;align-items:start}
+    .card{border:1px solid #e0e8e1;background:white;border-radius:15px;padding:25px;margin-bottom:20px}
+    .profile{text-align:center}
+    .avatar{width:80px;height:80px;border-radius:50%;object-fit:cover;background:#eff4e7}
+    .name{font-size:17px;overflow-wrap:anywhere;margin-top:16px}
+    .email{overflow-wrap:anywhere}
+    .badge{background:#e6efd5;color:#496539;border-radius:20px;padding:7px 11px;font-size:11px;display:inline-block}
+    .jump{display:grid;gap:9px;margin-top:22px;text-align:left}
+    .jump a{padding:10px 12px;background:#f3f7f3;border-radius:7px;font-size:12px;transition:background 0.2s}
+    .jump a:hover,.jump a:focus-visible{background:#e2edcd}
+    .section-title{display:flex;gap:12px;align-items:center;margin-bottom:22px}
+    .number{background:#d2fa43;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:700;flex-shrink:0}
+    .section-title p{margin:4px 0 0}
+    .fields{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .field{min-width:0}
+    .field.full-width{grid-column:1/-1}
+    label{display:block;font-size:12px;font-weight:600;margin-bottom:8px}
+    .form-control,input,select,textarea{width:100%;padding:12px;border:1px solid #d5e1d8;border-radius:8px;background:#fcfdfc;color:#203e34;font:14px 'Segoe UI',sans-serif;min-width:0}
+    textarea{resize:vertical;line-height:1.8;min-height:100px}
+    small{display:block;font-size:11px;color:#718278;margin-top:7px;line-height:1.7}
+    .form-control:focus,input:focus,select:focus,textarea:focus{outline:3px solid #83a66d;outline-offset:2px}
+    .actions{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px;background:white;border:1px solid #e0e8e1;border-radius:12px}
+    button,.button{padding:13px 20px;border-radius:8px;border:0;background:#315a46;color:white;font:600 13px 'Segoe UI',sans-serif;cursor:pointer;display:inline-block}
+    button:hover,.button:hover{background:#234a3b}
+    .actions a{font-size:12px}
+    .notice{background:#e2edcd;border-radius:8px;padding:15px;margin-bottom:20px}
+    .error-box{background:#f9e7e5;border:1px solid #e6c6c0;color:#9a4e47;border-radius:8px;padding:15px;margin-bottom:20px}
+    .errorlist{color:#a53732;font-size:12px;padding-left:18px;margin:8px 0 0;line-height:1.7}
+    .document{display:block;margin-top:14px;font-size:12px;text-decoration:underline}
+    .hint{margin:20px 0 0;font-size:11px;color:#718278;line-height:1.8}
+    section{scroll-margin-top:20px}
+    a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #83a66d;outline-offset:3px}
+    @media(max-width:750px){
+      .layout{grid-template-columns:1fr}
+      .jump{grid-template-columns:1fr 1fr}
+      .fields{grid-template-columns:1fr}
+      main{margin-top:25px;padding:0 16px 25px}
+      header{flex-wrap:wrap}
+      .card{padding:20px}
+      .actions{flex-wrap:wrap}
+    }
+    .skills-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:14px;border:1px solid #d5e1d8;border-radius:8px}
+    .skills-options label{display:flex;align-items:center;gap:8px;margin:0;font-weight:400;line-height:1.6;cursor:pointer}
+    .skills-options input[type=checkbox]{width:17px;height:17px;padding:0;margin:0;accent-color:#315a46;flex-shrink:0}
+  </style>
+  {% include 'includes/skills_dropdown_assets.html' %}
+</head>
+<body>
+<div class="site-language-tools">{% include 'includes/language_picker.html' %}</div>
+  <header>
+    <a class="brand" href="{% url 'jobseeker_dashboard' %}">{% include 'includes/brand_logo.html' %}SERVINN</a>
+    <nav aria-label="Main site navigation">
+      <a href="{% url 'jobseeker_dashboard' %}">Find jobs</a>
+      <a href="{% url 'my_applications' %}">My applications</a>
+    </nav>
+  </header>
+
+  <main>
+    <span class="eyebrow">Your professional profile</span>
+    <h1>Show what you bring to the job.</h1>
+    <p class="muted">Keep your local details, experience and work preferences in one place.</p>
+
+    {% for message in messages %}
+      <div class="notice" role="status">{{ message }}</div>
+    {% endfor %}
+
+    <div class="layout">
+      <aside>
+        <div class="card profile">
+          {% if user_data.profile_photo_file %}
+            <img class="avatar" src="{% url 'profile_file' request.session.user_email 'profile_photo' %}" alt="{{ user_data.full_name|default:'User profile photo' }}" data-fallback-src="{% static 'images/default-avatar.svg' %}">
+          {% elif user_data.profile_photo %}
+            <img class="avatar" src="data:image/jpeg;base64,{{ user_data.profile_photo }}" alt="{{ user_data.full_name|default:'User profile photo' }}" data-fallback-src="{% static 'images/default-avatar.svg' %}">
+          {% else %}
+            <img class="avatar" src="{% static 'images/default-avatar.svg' %}" alt="Default avatar">
+          {% endif %}
+          
+          <h2 class="name">{{ user_data.full_name|default:'My profile' }}</h2>
+          <p class="muted email">{{ request.session.user_email }}</p>
+          <span class="badge">{{ user_data.clearance_status|default:'Pending review' }}</span>
+
+          <nav class="jump" aria-label="Profile section links">
+            {% for section in form.sections %}
+              <a href="#section-{{ forloop.counter }}">{{ section.title }}</a>
+            {% endfor %}
+          </nav>
+        </div>
+
+        <div class="card">
+          <h2>Profile checklist</h2>
+          <p class="muted">Add a city or municipality, relevant skills, and recent work experience. Include training or certifications that support your application.</p>
+          {% if user_data.resume_document_file %}
+            <a class="document" href="{% url 'profile_file' request.session.user_email 'resume_document' %}">Download current resume</a>
+          {% endif %}
+          {% if user_data.admin_notes %}
+            <p class="muted"><strong>Review notes</strong><br>{{ user_data.admin_notes }}</p>
+          {% endif %}
+        </div>
+      </aside>
+
+      <form method="post" action="{% url 'profile_setup' %}">
+        {% csrf_token %}
+        
+        {% if form.errors %}
+          <div class="error-box" role="alert">
+            <strong>Please review the highlighted fields below.</strong>
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        {% for section in form.sections %}
+          <section class="card" id="section-{{ forloop.counter }}" aria-labelledby="section-heading-{{ forloop.counter }}">
+            <div class="section-title">
+              <span class="number" aria-hidden="true">{{ forloop.counter }}</span>
+              <div>
+                <h2 id="section-heading-{{ forloop.counter }}">{{ section.title }}</h2>
+                <p class="muted">{{ section.description }}</p>
+              </div>
+            </div>
+
+            <div class="fields">
+              {% for field in section.fields %}
+                <div class="field {% if field.name == 'skills' %}skills-control {% endif %}{% if field.field.widget.input_type == 'textarea' or field.name == 'bio' or field.name == 'skills' %}full-width{% endif %}">
+                  {{ field.label_tag }}
+                  {% if field.name == 'skills' %}
+                  <details class="skills-dropdown">
+                    <summary><span data-skills-summary>Select skills</span></summary>
+                    <div class="skills-dropdown-menu">{{ field }}</div>
+                  </details>
+                  <div class="other-skills-field" data-other-skills>
+                    {{ form.other_skills.label_tag }}
+                    {{ form.other_skills }}
+                    <small>Separate multiple skills with commas.</small>
+                    {{ form.other_skills.errors }}
+                  </div>
+                  {% else %}
+                  {{ field }}
+                  {% endif %}
+                  {% if field.help_text %}
+                    <small id="help-{{ field.auto_id }}">{{ field.help_text }}</small>
+                  {% endif %}
+                  {% if field.errors %}
+                    <div role="alert">{{ field.errors }}</div>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          </section>
+        {% endfor %}
+
+        <div class="actions">
+          <a href="{% url 'jobseeker_dashboard' %}">&larr; Back to dashboard</a>
+          <button type="submit">Save Changes</button>
+        </div>
+
+        <p class="hint">First and last name are required. Other fields are optional. Your email and verification status are managed separately.</p>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    document.querySelectorAll('img[data-fallback-src]').forEach(photo => {
+      const fallback = () => {
+        const src = photo.dataset.fallbackSrc;
+        if (!src) return;
+        delete photo.dataset.fallbackSrc;
+        photo.src = src;
+      };
+      photo.addEventListener('error', fallback);
+      if (photo.complete && photo.naturalWidth === 0) fallback();
+    });
+  </script>
+{% include 'includes/language_scripts.html' %}
+</body>
+</html>
