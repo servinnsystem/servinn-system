@@ -30,9 +30,11 @@ def _rate_limit(email):
 
 
 def _deliver(email, code):
-    if settings.EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend' and (
-            not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD):
-        raise EmailAuthError('Email delivery is not configured. The SERVINN administrator must configure the Gmail sender account.', 503)
+    from .mail_settings import delivery_options, sender_address
+    try:
+        options = delivery_options()
+    except Exception as error:
+        raise EmailAuthError('Email delivery is not configured. The administrator must check Administration > Sign-in settings.', 503) from None
     try:
         sent = send_mail(
             'Your SERVINN verification code',
@@ -40,7 +42,7 @@ def _deliver(email, code):
             'Enter this code in the SERVINN page where you started Google sign-in. '
             'It expires in 10 minutes and can be used once.\n\n'
             'Do not share this code. If you did not request it, ignore this email.',
-            settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+            sender_address(), [email], fail_silently=False, **options)
         if sent != 1:
             raise ValueError('Message not accepted')
     except Exception:

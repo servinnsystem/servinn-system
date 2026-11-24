@@ -17,6 +17,15 @@
         .identity-uploads h4 label{font-size:14px}
         .identity-uploads input[type=file]{max-width:100%;font:12px 'Segoe UI',sans-serif}
         @media(max-width:650px){.identity-section{padding:16px}.identity-uploads{padding:14px}}
+        [data-profile-step][hidden]{display:none!important}
+        .profile-steps{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+        .profile-steps span{padding:8px 12px;border-radius:20px;background:#eff4ee;font-size:12px}
+        .profile-steps [aria-current=step]{background:#315b43;color:white}
+        .profile-navigation{display:flex;justify-content:space-between;gap:16px;margin-top:24px}
+        .profile-navigation .btn-submit{width:auto;min-width:150px}
+        #profile-back{border:1px solid #315b43;border-radius:9px;background:white;color:#315b43;padding:14px 24px;font:inherit;cursor:pointer}
+        .profile-review{display:grid;grid-template-columns:minmax(100px,1fr) 2fr;gap:12px;overflow-wrap:anywhere}
+        .profile-review dt{font-weight:600}.profile-review dd{margin:0}
     </style>
     {% include 'includes/skills_dropdown_assets.html' %}
 </head>
@@ -30,19 +39,23 @@
         <div class="header-section">    
             <div>
                 <a class="brand" href="{% url 'home' %}">{% include 'includes/brand_logo.html' %}SERVINN</a><h2>Profile</h2>
-                <p>Complete your profile details, select your account type, and provide details to proceed.</p>
+                <p>Complete one step at a time. Your profile is submitted only after you confirm the user agreement.</p>
             </div>
         </div>
 
         {% for message in messages %}<p role="alert">{{ message }}</p>{% endfor %}
+        <aside class="security-note" aria-label="How your information is used"><strong>Your information and privacy</strong>Your details support identity verification, job matching and applications. Administrators review your ID documents. Employers see relevant applicant details when you apply. Read the <a href="{% url 'privacy_policy' %}" target="_blank" rel="noopener">Data Privacy Policy</a> before uploading or submitting.</aside>
         <form id="profile-form" method="POST" action="{% url 'create_profile' %}" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="hidden" name="user_agreement" id="user-agreement-value" value="">
 
+            <nav id="profile-steps" class="profile-steps" aria-label="Profile steps" hidden></nav>
+            <p id="profile-step-status" role="status" aria-live="polite" hidden></p>
+            <section data-profile-step="Personal details" aria-label="Personal details">
             <!-- Account Type Selection -->
             <div class="form-group">
                 <label for="role">Select Account Type</label>
-                <select name="role" id="role" class="form-select" onchange="toggleRoleFields(this.value)" required>
+                <select name="role" autocomplete="off" id="role" class="form-select" onchange="toggleRoleFields(this.value)" required>
                     <option value="job_seeker" {% if user_data.role != "employer" %}selected{% endif %}>Job Seeker</option>
                     <option value="employer" {% if user_data.role == "employer" %}selected{% endif %}>Employer</option>
                 </select>
@@ -51,7 +64,7 @@
             <!-- Company Name (Visible when Employer is selected) -->
             <div class="form-group hidden-field" id="companyNameGroup">
                 <label for="companyName">Company / Business Name</label>
-                <input type="text" id="companyName" name="company_name" class="form-input" placeholder="e.g. Acme Corporation" value="{{ user_data.company_name|default_if_none:'' }}">
+                <input type="text" id="companyName" name="company_name" autocomplete="organization" class="form-input" placeholder="e.g. Acme Corporation" value="{{ user_data.company_name|default_if_none:'' }}">
             </div>
 
             <!-- First, Middle, Last Name -->
@@ -59,15 +72,15 @@
             <div class="form-grid-3">
                 <div class="form-group">
                     <label for="firstName">First Name</label>
-                    <input type="text" id="firstName" name="first_name" value="{{ user_data.first_name|default_if_none:'' }}" class="form-input" placeholder="" required>
+                    <input type="text" id="firstName" name="first_name" autocomplete="given-name" value="{{ user_data.first_name|default_if_none:'' }}" class="form-input" placeholder="" required>
                 </div>
                 <div class="form-group">
                     <label for="middleName">Middle Name</label>
-                    <input type="text" id="middleName" name="middle_name" value="{{ user_data.middle_name|default_if_none:'' }}" class="form-input" placeholder="">
+                    <input type="text" id="middleName" name="middle_name" autocomplete="additional-name" value="{{ user_data.middle_name|default_if_none:'' }}" class="form-input" placeholder="">
                 </div>
                 <div class="form-group">
                     <label for="lastName">Last Name</label>
-                    <input type="text" id="lastName" name="last_name" value="{{ user_data.last_name|default_if_none:'' }}" class="form-input" placeholder="" required>
+                    <input type="text" id="lastName" name="last_name" autocomplete="family-name" value="{{ user_data.last_name|default_if_none:'' }}" class="form-input" placeholder="" required>
                 </div>
             </div>
 
@@ -75,15 +88,15 @@
             <div class="form-grid-3">
                 <div class="form-group">
                     <label for="email">{% if request.session.login_phone %}Verified mobile number{% else %}Email Address{% endif %}</label>
-                    <input type="text" id="email" name="email" class="form-input" value="{{ request.session.login_phone|default:request.session.user_email }}" readonly placeholder="" required>
+                    <input type="text" id="email" name="email" autocomplete="username" class="form-input" value="{{ request.session.login_phone|default:request.session.user_email }}" readonly placeholder="" required>
                 </div>
                 <div class="form-group">
                     <label for="contactNumber">Contact Number</label>
-                    <input type="tel" id="contactNumber" name="contact_number" value="{{ user_data.contact_number|default_if_none:'' }}" class="form-input" placeholder="09123456789" required>
+                    <input type="tel" id="contactNumber" name="contact_number" autocomplete="tel" value="{{ user_data.contact_number|default_if_none:'' }}" class="form-input" placeholder="09123456789" required>
                 </div>
                 <div class="form-group">
                     <label for="gender">Gender</label>
-                    <select id="gender" name="gender" class="form-select" required>
+                    <select id="gender" name="gender" autocomplete="sex" class="form-select" required>
                         <option value="" disabled selected>Select Gender</option>
                         <option value="Male" {% if user_data.gender == "Male" %}selected{% endif %}>Male</option>
                         <option value="Female" {% if user_data.gender == "Female" %}selected{% endif %}>Female</option>
@@ -98,10 +111,12 @@
                 </div>
                 <div class="form-group">
                     <label for="nationality">Nationality</label>
-                    <input id="nationality" name="nationality" type="text" maxlength="100" class="form-input" value="{{ user_data.nationality|default:'' }}" placeholder="Enter nationality">
+                    <input id="nationality" name="nationality" autocomplete="off" type="text" maxlength="100" class="form-input" value="{{ user_data.nationality|default:'' }}" placeholder="Enter nationality">
                 </div>
             </div>
 
+            </section>
+            <section data-profile-step="Address" aria-label="Address">
             <section class="identity-section" aria-labelledby="address-heading">
                 <h3 id="address-heading">Address Information</h3>
                 <div class="form-group">
@@ -128,6 +143,49 @@
                 </div>
             </section>
 
+
+
+            </section>
+            <section data-profile-step="Skills and resume" aria-label="Skills and resume">
+                <h3>Skills and resume</h3>
+                <p>Choose the work you can do and optionally attach your resume. Employers can continue to the next step.</p>
+            <!-- Upload Resume -->
+            <div class="form-group" id="resumeGroup">
+                <label for="resumeFileInput">Upload Resume</label>
+                <div class="file-upload-box">
+                    <div class="upload-text">📄 Click to upload your Resume</div>
+                    <div class="file-name" id="resumeFileName"></div>
+                    <input type="file" id="resumeFileInput" name="resume_file" accept=".pdf" onchange="showFileName(this, 'resumeFileName')">
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="form-group skills-control" id="skillsGroup">
+                <fieldset class="skills-picker">
+                    <legend>Skills</legend>
+                    <details class="skills-dropdown">
+                    <summary><span data-skills-summary>Select skills</span></summary>
+                    <div class="skills-dropdown-menu">
+                    <div class="skills-options">
+                        {% for value, label in job_categories %}
+                        <label><input type="checkbox" name="skills" value="{{ value }}" {% if value in selected_skills %}checked{% endif %}> <span>{{ label }}</span></label>
+                        {% endfor %}
+                    </div>
+                    </div>
+                    </details>
+                </fieldset>
+                <div class="other-skills-field" data-other-skills>
+                    <label for="other-skills">Other skills (please specify)</label>
+                    <input id="other-skills" name="other_skills" autocomplete="off" type="text" maxlength="300" class="form-input" value="{{ user_data.other_skills|default:'' }}" placeholder="For example: Sewing, Computer repair">
+                    <small>Separate multiple skills with commas.</small>
+                </div>
+                <small>Select all skills that apply.</small>
+            </div>
+
+            </section>
+            <section data-profile-step="Identity documents" aria-label="Identity documents">
+            <section class="identity-section" aria-labelledby="identity-heading">
+                <h3 id="identity-heading">Identity Verification</h3>
             <div class="form-group">
                 <label for="profilePhoto">Upload Profile Photo</label>
                 <div class="file-upload-box">
@@ -135,13 +193,10 @@
                     <div class="file-name" id="photoFileName"></div>
                 </div>
             </div>
-
-            <section class="identity-section" aria-labelledby="identity-heading">
-                <h3 id="identity-heading">Identity Verification</h3>
                 <p class="identity-note">Provide clear documents for review by authorized administrators.</p>
                 <div class="form-group">
                     <label for="idType">Select Valid ID Type</label>
-                    <select id="idType" name="id_type" class="form-select" required>
+                    <select id="idType" name="id_type" autocomplete="off" class="form-select" required>
                         <option value="" disabled {% if not user_data.id_type %}selected{% endif %}>Choose ID type</option>
                         <option value="National ID" {% if user_data.id_type == "National ID" %}selected{% endif %}>National ID</option>
                         <option value="Driver's License" {% if user_data.id_type == "Driver's License" %}selected{% endif %}>Driver's License</option>
@@ -177,45 +232,22 @@
                 </div>
             </section>
 
-            <!-- Upload Resume -->
-            <div class="form-group" id="resumeGroup">
-                <label>Upload Resume</label>
-                <div class="file-upload-box">
-                    <div class="upload-text">📄 Click to upload your Resume</div>
-                    <div class="file-name" id="resumeFileName"></div>
-                    <input type="file" name="resume_file" accept=".pdf" onchange="showFileName(this, 'resumeFileName')">
-                </div>
-            </div>
-
-            <!-- Skills -->
-            <div class="form-group skills-control" id="skillsGroup">
-                <fieldset class="skills-picker">
-                    <legend>Skills</legend>
-                    <details class="skills-dropdown">
-                    <summary><span data-skills-summary>Select skills</span></summary>
-                    <div class="skills-dropdown-menu">
-                    <div class="skills-options">
-                        {% for value, label in job_categories %}
-                        <label><input type="checkbox" name="skills" value="{{ value }}" {% if value in selected_skills %}checked{% endif %}> <span>{{ label }}</span></label>
-                        {% endfor %}
-                    </div>
-                    </div>
-                    </details>
-                </fieldset>
-                <div class="other-skills-field" data-other-skills>
-                    <label for="other-skills">Other skills (please specify)</label>
-                    <input id="other-skills" name="other_skills" type="text" maxlength="300" class="form-input" value="{{ user_data.other_skills|default:'' }}" placeholder="For example: Sewing, Computer repair">
-                    <small>Separate multiple skills with commas.</small>
-                </div>
-                <small>Select all skills that apply.</small>
-            </div>
-
+            </section>
+            <section data-profile-step="Confirmation" aria-label="Confirmation">
+                <h3>Check your information</h3>
+                <p>Review your details below. Use Back to make changes. Nothing is submitted until you accept the user agreement.</p>
+                <dl id="profile-review" class="profile-review"></dl>
             <label class="declaration"><input type="checkbox" name="declaration" value="on" required {% if user_data.declaration %}checked{% endif %}> I confirm that these details are accurate, the uploaded ID belongs to me, and I authorize SERVINN administrators to review it for account verification.</label>
             <button type="submit" class="btn-submit">Submit profile for review &rarr;</button>
             <noscript>
                 {% include 'accounts/user_agreement.html' with agreement_heading_id='agreement-title-fallback' %}
                 <label class="declaration"><input type="checkbox" name="user_agreement" value="on" required> I have read and accept the SERVINN user agreement.</label>
             </noscript>
+            </section>
+            <div id="profile-navigation" class="profile-navigation" hidden>
+                <button type="button" id="profile-back">Back</button>
+                <button type="button" id="profile-next" class="btn-submit">Continue &rarr;</button>
+            </div>
         </form>
     </div>
 
@@ -254,6 +286,12 @@
         const agreementConfirm = document.getElementById('agreement-confirm');
         const agreementSubmit = document.getElementById('agreement-submit');
         let agreementAccepted = false;
+        window.addEventListener('servinn:request-failed', () => {
+            agreementAccepted = false;
+            agreementSubmit.disabled = !agreementConfirm.checked;
+            document.getElementById('agreement-back').disabled = false;
+            document.getElementById('agreement-status').hidden = true;
+        });
         profileForm.addEventListener('submit', event => {
             if (!agreementAccepted) {
                 event.preventDefault();
@@ -312,6 +350,8 @@
         }
         toggleRoleFields(document.getElementById('role').value);
     </script>
+{{ profile_error_fields|json_script:"profile-error-fields" }}
+<script src="{% static 'js/profile_steps.js' %}"></script>
 {% include 'includes/language_scripts.html' %}
 </body> 
 </html>

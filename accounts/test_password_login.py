@@ -5,7 +5,7 @@ from django.contrib.messages.storage.fallback import FallbackStorage
 from django.contrib.sessions.backends.signed_cookies import SessionStore
 from django.test import RequestFactory, SimpleTestCase
 from django.urls import reverse
-from google.api_core.exceptions import AlreadyExists
+from servinn_core.firestore_config import AlreadyExists
 
 from accounts.views import login_view, register_seeker, register_employer
 from accounts.passwords import verify_account_password
@@ -79,3 +79,21 @@ class PasswordAccountTests(SimpleTestCase):
     def test_password_hash_cannot_be_used_as_the_password(self):
         stored = make_password('test-password')
         self.assertFalse(verify_account_password(stored, stored)[0])
+
+
+class RegistrationRoleRoutingTests(SimpleTestCase):
+    def test_employer_registration_uses_employer_form_and_google_role(self):
+        response = self.client.get(reverse('register') + '?role=employer')
+        self.assertContains(response, 'action="' + reverse('register_employer') + '"')
+        self.assertContains(response, reverse('google_login') + '?role=employer')
+
+    def test_job_seeker_registration_retains_correct_form(self):
+        response = self.client.get(reverse('register'))
+        self.assertContains(response, 'action="' + reverse('register_seeker') + '"')
+
+    @patch('accounts.views.db')
+    def test_failed_employer_registration_does_not_switch_account_type(self, db):
+        response = self.client.post(reverse('register_employer'), {'email': 'test@example.com'})
+        self.assertContains(response, 'action="' + reverse('register_employer') + '"')
+        self.assertContains(response, reverse('google_login') + '?role=employer')
+        db.collection.return_value.document.return_value.create.assert_not_called()

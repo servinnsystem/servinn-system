@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // SERVINN accesses Firestore exclusively through its trusted Django server.
+    // Block direct web/mobile access, including all nested collections.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

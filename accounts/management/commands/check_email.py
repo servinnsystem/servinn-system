@@ -2,6 +2,7 @@ import smtplib
 
 from django.conf import settings
 from django.core.mail import get_connection
+from accounts.mail_settings import load_mail
 from django.core.management.base import BaseCommand, CommandError
 
 
@@ -11,10 +12,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if settings.EMAIL_BACKEND != 'django.core.mail.backends.smtp.EmailBackend':
             raise CommandError('Select the SMTP email backend to check live email delivery.')
-        if not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD:
-            raise CommandError(r'Gmail sender credentials are missing. Run .\run_with_gmail.ps1 to configure this server session.')
         try:
-            with get_connection() as connection:
+            config = load_mail()
+        except Exception:
+            raise CommandError('Saved Gmail settings could not be read. Open Administration > Sign-in settings to configure the sender again.') from None
+        if not config.get('sender') or not config.get('password'):
+            raise CommandError('Gmail sender credentials are missing. Open Administration > Sign-in settings to configure the sender.')
+        try:
+            with get_connection(username=config['sender'], password=config['password']) as connection:
                 if connection.connection is None:
                     raise CommandError('The SMTP connection could not be opened.')
         except smtplib.SMTPAuthenticationError:

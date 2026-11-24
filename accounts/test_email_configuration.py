@@ -12,7 +12,7 @@ class EmailConfigurationTests(SimpleTestCase):
     @override_settings(EMAIL_HOST_USER='', EMAIL_HOST_PASSWORD='')
     @patch('accounts.management.commands.check_email.get_connection')
     def test_missing_credentials_do_not_connect(self, connection):
-        with self.assertRaisesMessage(CommandError, 'run_with_gmail.ps1'):
+        with self.assertRaisesMessage(CommandError, 'Sign-in settings'):
             call_command('check_email', stdout=StringIO())
         connection.assert_not_called()
 

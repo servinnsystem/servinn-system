@@ -58,7 +58,7 @@ class ProfileUploadTests(SimpleTestCase):
         request._messages = FallbackStorage(request)
         return request
 
-    def test_upload_above_old_limit_is_stored_outside_firestore(self):
+    def test_upload_is_stored_privately_outside_database(self):
         response = create_profile(self.request(300 * 1024))
         self.assertEqual(response.status_code, 302)
         payload = self.doc.update.call_args.args[0]

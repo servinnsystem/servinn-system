@@ -1,0 +1,14 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/error_popup.css' %}">
+<dialog id="servinn-error-dialog" aria-labelledby="servinn-error-title" aria-describedby="servinn-error-message" data-no-translate>
+  <div class="servinn-error-icon" aria-hidden="true">!</div>
+  <h2 id="servinn-error-title">Something needs your attention</h2>
+  <p id="servinn-error-message"></p>
+  <button type="button" id="servinn-error-close" autofocus>Close</button>
+</dialog>
+<div id="servinn-server-errors" hidden>
+{% for message in messages %}{% if message.level >= 30 %}<p>{{ message }}</p>{% endif %}{% endfor %}
+{% if verification_error %}<p>{{ verification_error }}</p>{% endif %}
+{% if form.errors %}{% for field in form %}{% for error in field.errors %}<p>{{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}{% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}{% endif %}
+</div>
+<script src="{% static 'js/error_popup.js' %}" defer></script>

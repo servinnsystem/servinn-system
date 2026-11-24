@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.contrib import messages # type: ignore
 from django.http import Http404
 from accounts.decorators import role_required
-from servinn_core.firebase_config import db # type: ignore
+from servinn_core.firestore_config import db # type: ignore
 
 @role_required(allowed_roles=['admin'])
 def account_profile(request, account_id):
@@ -56,7 +56,7 @@ def account_profile(request, account_id):
 @role_required(allowed_roles=['admin'])
 def dashboard(request):
     """Admin dashboard overview displaying system-wide metrics and pending verifications."""
-    # Query collection metrics from Firestore
+    # Query record metrics from Firestore
     users_ref = db.collection('users').stream()
     users_list = [u.to_dict() | {'email': u.id} for u in users_ref]
     users_list = [u for u in users_list if u.get('role') in ('job_seeker', 'employer')]

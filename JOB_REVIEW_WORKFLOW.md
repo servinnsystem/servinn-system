@@ -9,4 +9,4 @@
 
 Only jobs with both `status: Active` and `review_status: Approved` are available in public search, recommendations, the job seeker dashboard, direct detail links, saving, applications and ratings. Existing postings without an explicit approval are hidden until an administrator reviews them. Existing applications are retained.
 
-The review form includes the Firestore document version. A changed posting cannot be approved from an outdated review page, and version preconditions protect concurrent writes. No database migration or automatic approval of existing postings is performed.
+The review form includes the database record version. A changed posting cannot be approved from an outdated review page, and version preconditions protect concurrent writes. No database migration or automatic approval of existing postings is performed.

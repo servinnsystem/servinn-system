@@ -1,0 +1,7 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Unable to complete request | SERVINN</title>
+<style>body{margin:0;background:#f2f6f3;color:#203e34;font:16px/1.7 'Segoe UI',sans-serif}main{max-width:520px;margin:12vh auto;padding:30px;background:white;border:1px solid #dce5df;border-radius:16px}a{color:#315a46}h1{font-size:26px}</style></head><body>
+<main><h1>We couldn't complete that request</h1><p>{{ error_message }}</p><a href="{{ return_url }}">Back to SERVINN</a><noscript><p>Return to the previous page and check your details before trying again.</p></noscript></main>
+<footer style="max-width:520px;margin:20px auto;padding:0 24px">{% include 'includes/language_picker.html' %}</footer>
+{% include 'includes/language_scripts.html' %}<script>window.servinnPendingError = {{ error_message_json|safe }};</script>
+</body></html>

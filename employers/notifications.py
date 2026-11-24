@@ -18,9 +18,11 @@ def send_acceptance_email(reference, application):
         validate_email(recipient)
     except ValidationError:
         raise AcceptanceEmailError('The applicant has no valid email address.')
-    if settings.EMAIL_BACKEND == 'django.core.mail.backends.smtp.EmailBackend' and (
-            not settings.EMAIL_HOST_USER or not settings.EMAIL_HOST_PASSWORD):
-        raise AcceptanceEmailError('The administrator must configure the Gmail sender account.')
+    from accounts.mail_settings import delivery_options, sender_address
+    try:
+        options = delivery_options()
+    except Exception:
+        raise AcceptanceEmailError('The administrator must configure the Gmail sender account in Administration > Sign-in settings.') from None
     title = application.get('job_title') or 'the position you applied for'
     company = application.get('company_name') or 'the employer'
     name = application.get('applicant_name') or 'Applicant'
@@ -33,7 +35,7 @@ def send_acceptance_email(reference, application):
     body += '\nThank you for using SERVINN.'
     try:
         sent = send_mail('SERVINN: Your job application has been accepted', body,
-                         settings.DEFAULT_FROM_EMAIL, [recipient], fail_silently=False)
+                         sender_address(), [recipient], fail_silently=False, **options)
         if sent != 1:
             raise ValueError('Email not accepted by the mail server')
     except Exception:

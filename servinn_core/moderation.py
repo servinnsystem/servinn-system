@@ -6,8 +6,10 @@ from django.core.exceptions import ValidationError
 MESSAGE = 'Please remove profanity, abusive language, or threats before submitting.'
 # Whole words only: do not match short fragments inside names or occupations.
 BLOCKED_TERMS = (
-    'fuck', 'fucking', 'fucker', 'motherfucker', 'shit', 'bullshit', 'asshole',
-    'bitch', 'bastard', 'cunt', 'putangina', 'putang ina', 'tangina', 'puta',
+    'fuck', 'fucking', 'fucker', 'fuckers', 'fucked', 'fucks', 'motherfucker',
+    'shit', 'shits', 'shitty', 'bullshit', 'asshole', 'assholes',
+    'bitch', 'bitches', 'bastard', 'cunt', 'putangina', 'putang ina',
+    'putang ina mo', 'tangina', 'tangina mo', 'puta',
     'gago', 'gaga', 'tanga', 'ulol', 'yawa', 'buang', 'pisti', 'piste',
     'bilat', 'burat', 'i will kill you', 'i will hurt you', 'kill yourself',
     'papatayin kita', 'patyon taka',
@@ -33,7 +35,7 @@ def normalize(value):
 
 def term_pattern(term):
     # Repeated letters and separators catch e.g. f.u.c.k and shiiit.
-    return r'(?<!\w)' + r'[\W_]*'.join(re.escape(c) for c in normalize(term) if c != ' ') + r'(?!\w)'
+    return r'(?<![^\W_])' + r'[\W_]*'.join(re.escape(c) for c in normalize(term) if c != ' ') + r'(?![^\W_])'
 
 
 PATTERNS = tuple(re.compile(term_pattern(term)) for term in BLOCKED_TERMS)
@@ -50,6 +52,19 @@ def validate_respectful_text(value):
 
 
 class RespectfulTextFormMixin:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        hints = {
+            'first_name': 'given-name', 'middle_name': 'additional-name', 'last_name': 'family-name',
+            'full_name': 'name', 'email': 'email', 'contact_number': 'tel', 'date_of_birth': 'bday',
+            'company_name': 'organization', 'business_email': 'email', 'business_phone': 'tel',
+            'website': 'url', 'street_address': 'address-line1', 'barangay': 'address-level3',
+            'city_municipality': 'address-level2', 'province': 'address-level1', 'postal_code': 'postal-code',
+        }
+        for name, hint in hints.items():
+            if name in self.fields:
+                self.fields[name].widget.attrs.setdefault('autocomplete', hint)
+
     def clean(self):
         values = super().clean()
         for name in tuple(values):

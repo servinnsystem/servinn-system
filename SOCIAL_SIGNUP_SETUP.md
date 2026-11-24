@@ -1,103 +1,78 @@
-# SERVINN Google signup
+# Direct Google OAuth sign-in
 
-The Google signup button authenticates with Firebase, then sends a verified ID
-token to Django. SERVINN emails a six-digit code to the selected Google address.
-After the code is confirmed, new accounts continue to Profile setup; existing
-completed accounts go to their dashboard. No Google password is stored by SERVINN.
+SERVINN uses Google's standard OAuth 2.0 authorization-code flow with OpenID Connect. Firebase Authentication and its browser/Admin SDKs are no longer used. Email/password login, Django administrator authentication, Firestore records and the extra email verification code remain in place.
 
-## Configuration
+## 1. Create Google OAuth credentials
 
-Google sign-in is enabled for `servinnsystem-bf596`. Both `localhost` and
-`127.0.0.1` are authorized domains (verified November 15, 2026).
+1. Open https://console.cloud.google.com/ and select your Google Cloud project. An existing project can be reused.
+2. Open **Google Auth Platform**. Configure Branding, Audience and Data Access (consent screen). Request only `openid`, `email` and `profile`.
+3. If the app is in testing mode, add the Google accounts you will use under test users.
+4. Open **Clients** (or APIs & Services > Credentials), create an OAuth client ID, and choose **Web application**.
+5. Add this exact authorized redirect URI for local development:
 
-## Test signup
+   `http://127.0.0.1:8000/accounts/google-callback/`
 
-1. Run `python manage.py runserver`.
-2. Open `http://127.0.0.1:8000/accounts/register/`.
-3. Click **Sign up with Google** and select an account.
-4. Open your Gmail inbox and enter the six-digit SERVINN code on the verification page.
-5. After verification, a new user should reach `/accounts/create-profile/`.
-6. Complete profile setup and accept the user agreement.
+   If SERVINN is opened through localhost instead, add `http://localhost:8000/accounts/google-callback/` and configure that exact address in SERVINN. The host must match the browser's sign-in host so the session cookie is returned. For deployment, use the site's HTTPS address with the same callback path.
+6. Copy the client ID and client secret privately. This is an OAuth client credential, not a service-account JSON key, Firebase API key, or Gmail App Password.
 
-## Configure the Gmail sender (required for delivery)
+Google's setup and flow documentation:
+https://developers.google.com/identity/protocols/oauth2/web-server
+https://developers.google.com/identity/openid-connect/openid-connect
 
-### Guided startup
+## 2. Save credentials in SERVINN
 
-Stop any running SERVINN server, then run this in the project PowerShell terminal:
+1. Sign in to the administrator portal using your existing administrator credentials.
+2. Open **Sign-in settings** (`/portal-admin/sign-in-settings/`).
+3. Under **Google OAuth credentials**, enter the client ID, client secret, and exact authorized redirect URI.
+4. Choose **Save Google OAuth credentials**. The secret is encrypted in `.runtime/google-oauth.enc` and is never redisplayed. Keep the Django secret key stable across server restarts.
+5. Under Gmail sender, keep or configure the sender used for the additional six-digit email code. OAuth credentials and Gmail sender credentials are separate.
+
+No terminal feature-management command is needed. Alternatively, set `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` and `GOOGLE_OAUTH_REDIRECT_URI` in the private `.env` file and restart the server. The alternative names `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` are also accepted. Saved admin configuration takes precedence over environment values.
+
+## 3. Sign in
+
+Choose **Continue with Google** or **Sign up with Google**. The browser goes directly to Google's account selection page, then returns to SERVINN's callback. Enter the six-digit email code. New users continue to profile setup; existing users retain their profile, password and role.
+
+Existing accounts migrated from Firebase link to the verified Google `sub` only after the email code is confirmed. A legacy `firebase_uid` is not compared with a Google subject: they are different identifiers. Historical fields may remain in stored account payloads for reference, but are not used to authenticate.
+
+## Security and error behavior
+
+- Each authorization request has a random, short-lived state, nonce and PKCE verifier/challenge.
+- The callback consumes its session state once. Server-to-server code exchange uses the client secret and verifier with bounded network timeouts.
+- Google's Python authentication library verifies the ID token. SERVINN also checks issuer, audience, authorized party, nonce, verified email and subject.
+- Access tokens, authorization codes, ID tokens and client secrets are never placed in application account records or browser code. No refresh token is requested.
+- Only the verified Google identity supplies the account email. An existing Google subject binding is rechecked after email-code verification.
+- Failed or cancelled sign-in returns to the login page with a recoverable error popup. Existing Firebase-based verification challenges cannot finish a new OAuth login.
+- The already-hidden Firebase phone-login endpoint is retired and returns HTTP 410. Email/password, Google OAuth and administrator login remain supported.
+
+## Troubleshooting
+
+- **redirect_uri_mismatch:** match the saved callback URI exactly in both Google Cloud and SERVINN, including the trailing slash, host, scheme and port.
+- **access_denied / test user error:** add the Google account as a test user or finish the consent-screen publishing requirements.
+- **invalid_client:** check that the Web application client ID and secret belong to the same client.
+- **expired or unverifiable sign-in:** restart sign-in in one browser tab; state expires after ten minutes.
+- **Email not configured:** save the Gmail sender separately in Sign-in settings.
+
+For an optional configuration check without displaying credentials:
 
 ```powershell
-.\run_with_gmail.ps1
+.\env\Scripts\python.exe manage.py check_google_oauth
 ```
 
-Enter the sender Gmail address and its **App Password** when prompted. Password
-input is hidden. The helper checks the SMTP login without sending mail, then
-starts SERVINN in the same process environment. Keep that terminal open while
-using the app. Credentials are not saved to source files and are cleared from
-the script's environment when the server stops.
+This validates configuration shape only. A real browser sign-in is needed to confirm that Google accepts the configured client credentials and redirect URI.
 
-If PowerShell blocks the script under its execution policy, use the manual
-environment-variable commands below. No execution-policy change is required.
+## Application database: Cloud Firestore
 
-To check an already configured terminal without starting the server, run
-`python manage.py check_email`.
+Application profiles, jobs, applications, saved jobs and ratings now use Cloud Firestore. Configure FIRESTORE_PROJECT_ID, FIRESTORE_DATABASE_ID and FIRESTORE_CREDENTIALS_FILE in the private .env file. The service-account JSON is a database credential and is separate from the Google OAuth client ID and secret.
 
-### Manual setup
+Django administrator accounts and browser sessions use the local db.sqlite3 file. Keep that file, private_uploads/, media/ and .runtime/ backed up. No PostgreSQL driver, Prisma project connection or DATABASE_URL is required by SERVINN.
 
-The recipient is the Google account selected during signup. The sender is a Gmail
-account owned by the SERVINN operator. Configure the sender once on the server.
+The completed PostgreSQL-to-Firestore transfer was verified for all 14 source application records. Recovery copies of the previous database data and administrator accounts are saved privately under the directory listed in .runtime/firestore-cutover.json.
 
-1. Enable **2-Step Verification** for the Gmail sender account.
-2. Create an [App Password](https://myaccount.google.com/apppasswords) for SERVINN.
-   Some organization or protected accounts do not offer App Passwords; use a
-   supported SMTP sender if your account cannot create one.
-3. Stop the development server. In the PowerShell terminal where you start SERVINN,
-   run the following. Replace the email address with your sender address; enter
-   the App Password when prompted, without spaces. Do not use your normal Gmail password.
+To check the database connection without changing data:
 
-   ```powershell
-   $env:EMAIL_HOST_USER = "your-sender@gmail.com"
-   $servinnMailSecret = Read-Host "Gmail App Password" -AsSecureString
-   $env:EMAIL_HOST_PASSWORD = [System.Net.NetworkCredential]::new("", $servinnMailSecret).Password
-   python manage.py runserver
-   ```
+```powershell
+.\env\Scripts\python.exe manage.py check_database
+```
 
-   The password is not echoed or written into your source files. These environment
-   settings apply to this terminal and the server it starts; configure equivalent
-   environment variables in your hosting service for deployment.
-
-SMTP defaults to `smtp.gmail.com`, port `587`, using TLS. Optional environment
-variables are `EMAIL_HOST`, `EMAIL_PORT`, and `DEFAULT_FROM_EMAIL`.
-
-Until the sender is configured, signup reports an email-configuration error and
-does not create an account or an authenticated session. Emails are sent only when
-a user initiates Google sign-in or requests another code.
-
-## Verification behavior
-
-- Codes expire after 10 minutes and can be used only once.
-- Resends require a 60-second wait; up to six sends are allowed per address per hour.
-- Five incorrect attempts invalidate the challenge.
-- A resend invalidates the previous code without extending the original expiry.
-- Codes are never included in browser responses, session data, or application logs.
-- Email confirmation is separate from administrator profile/document approval.
-- Verification state uses Django's cache. The default local cache works with the
-  single-process development server; restarting clears pending challenges.
-  Configure a shared cache supporting atomic `add` and `incr` for multi-process
-  hosting so all workers use the same challenges and rate limits.
-
-If the browser blocks the sign-in window, allow popups for SERVINN and try again.
-
-Login and signup pages use `Cross-Origin-Opener-Policy: same-origin-allow-popups`
-so the Google popup can communicate with the page. Other pages keep Django's
-default opener policy.
-
-If the popup still fails, a **Continue with Google in this tab** button is offered.
-This optional redirect flow remembers the account type and finishes signup when
-Google returns. Browsers that block cross-site storage can also block Firebase
-redirect results. For hosted deployments, follow
-[Firebase's redirect configuration guidance](https://firebase.google.com/docs/auth/web/redirect-best-practices).
-The popup flow remains available if a redirect returns no result.
-
-[Official Firebase Google sign-in instructions](https://firebase.google.com/docs/auth/web/google-signin)
-
-[Google App Password instructions](https://support.google.com/accounts/answer/185833)
+For database access protection, publish `firestore.rules` using the instructions in [Firestore security](docs/FIRESTORE_SECURITY.md). The rules block direct client access; Django server access remains governed by IAM and application authorization.

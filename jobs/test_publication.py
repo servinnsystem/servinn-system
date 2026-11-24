@@ -115,7 +115,7 @@ class PublicationTests(SimpleTestCase):
         manage_jobs(self.request({'job_id': 'job', 'action': 'approve', 'version': 'old'}, admin=True))
         ref.update.assert_not_called()
 
-    def test_update_uses_firestore_version_precondition(self):
+    def test_update_uses_database_version_precondition(self):
         db, ref, snapshot = Mock(), Mock(), Mock(update_time=timezone.now())
         update_snapshot(db, ref, snapshot, {'status': 'Active'})
         db.write_option.assert_called_once_with(last_update_time=snapshot.update_time)

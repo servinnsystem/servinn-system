@@ -1,10 +1,11 @@
+from servinn_core.firestore_config import FieldFilter
 from jobs.publication import is_published, pending_review, update_snapshot
 # employers/views.py
 from django.shortcuts import render, redirect  # type: ignore
 from django.contrib import messages  # type: ignore
 from django.utils import timezone
 from accounts.decorators import role_required
-from servinn_core.firebase_config import db  # type: ignore
+from servinn_core.firestore_config import db  # type: ignore
 
 @role_required(allowed_roles=['employer'])
 def job_status(request, job_id):
@@ -70,14 +71,14 @@ def dashboard(request):
         return redirect('create_profile')
 
     # Fetch total job postings created by employer
-    jobs_ref = db.collection('job_postings').where('employer_email', '==', employer_email).stream()
+    jobs_ref = db.collection('job_postings').where(filter=FieldFilter('employer_email', '==', employer_email)).stream()
     jobs_list = [job.to_dict() | {'id': job.id} for job in jobs_ref]
     from jobs.ratings import rating_summary
     for job in jobs_list:
         job.update(rating_summary(db, job['id']))
 
     # Fetch total applicants received across all jobs
-    apps_ref = db.collection('applications').where('employer_email', '==', employer_email).stream()
+    apps_ref = db.collection('applications').where(filter=FieldFilter('employer_email', '==', employer_email)).stream()
     applications = [app.to_dict() for app in apps_ref]
 
     accepted_count = sum(app.get('status') == 'Accepted' for app in applications)
@@ -165,7 +166,7 @@ def view_applicants(request):
     """Retrieves all submitted job applications for this employer."""
     employer_email = request.session.get('user_email')
 
-    apps_ref = db.collection('applications').where('employer_email', '==', employer_email).stream()
+    apps_ref = db.collection('applications').where(filter=FieldFilter('employer_email', '==', employer_email)).stream()
     applications = []
 
     for app in apps_ref:
@@ -230,8 +231,8 @@ def update_applicant_status(request, app_id):
             changes['status_updated_at'] = timezone.now()
             event = {'status': new_status, 'at': changes['status_updated_at'],
                      'note': changes.get('candidate_message', '')}
-            from firebase_admin import firestore
-            changes['status_history'] = firestore.ArrayUnion([event])
+            from servinn_core.firestore_config import SERVER_TIMESTAMP, ArrayUnion
+            changes['status_history'] = ArrayUnion([event])
             try:
                 update_snapshot(db, app_ref, snapshot, changes)
             except Exception:

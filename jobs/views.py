@@ -1,9 +1,10 @@
+from servinn_core.firestore_config import FieldFilter
 from jobs.publication import is_published
 # jobs/views.py
 from django.shortcuts import render, redirect # type: ignore
 from django.contrib import messages # type: ignore
 from accounts.decorators import role_required
-from servinn_core.firebase_config import db # type: ignore
+from servinn_core.firestore_config import db # type: ignore
 from .matching_algorithm import generate_smart_matches
 from .location_engine import filter_jobs_by_proximity
 
@@ -52,48 +53,52 @@ def employer_photo(request, job_id):
     return response
 
 def job_search(request):
-    """
-    Search engine endpoint that processes keyword, category, location, 
-    and distance filter parameters.
-    """
-    keyword = request.GET.get('q', '').strip().lower()
-    category_filter = request.GET.get('category', '').strip().lower()
-    location_filter = request.GET.get('location', '').strip().lower()
-    user_lat = request.GET.get('lat')
-    user_lon = request.GET.get('lon')
-
-    jobs_ref = db.collection('job_postings').where('status', '==', 'Active').stream()
+    """Search real, approved postings with working filters and sorting."""
+    from datetime import datetime
+    from .categories import normalize_skills
+    from math import isfinite
+    keyword = request.GET.get('q', '').strip()
+    category_filter = request.GET.get('category', '').strip()
+    location_filter = request.GET.get('location', '').strip()
+    selected_type = request.GET.get('job_type', '')
+    sort = request.GET.get('sort', 'latest')
+    sort = sort if sort in ('latest', 'title') else 'latest'
+    job_types = ('Full-time', 'Part-time', 'Contract', 'Temporary')
+    selected_type = selected_type if selected_type in job_types else ''
     all_jobs = []
-
-    for j in jobs_ref:
-        data = j.to_dict()
-        if not is_published(data):
+    for document in db.collection('job_postings').where(filter=FieldFilter('status', '==', 'Active')).stream():
+        job = document.to_dict()
+        if not is_published(job):
             continue
-        data['id'] = j.id
-        
-        # Keyword filtering across title, description, and required skills
-        title_match = keyword in data.get('title', '').lower() if keyword else True
-        desc_match = keyword in data.get('description', '').lower() if keyword else True
-        category_match = category_filter in data.get('category', '').lower() if category_filter else True
-        loc_match = location_filter in data.get('location', '').lower() if location_filter else True
-
-        if (title_match or desc_match) and category_match and loc_match:
-            all_jobs.append(data)
-
-    # Apply distance calculations if user provided browser geolocation coordinates
-    if user_lat and user_lon:
+        job['id'] = document.id
+        text = ' '.join(str(job.get(field) or '') for field in ('title', 'description', 'company_name', 'category'))
+        text += ' ' + ' '.join(normalize_skills(job.get('required_skills')))
+        if keyword.casefold() not in text.casefold():
+            continue
+        if category_filter.casefold() not in str(job.get('category') or '').casefold():
+            continue
+        if location_filter.casefold() not in str(job.get('location') or '').casefold():
+            continue
+        if selected_type and job.get('job_type') != selected_type:
+            continue
+        posted = job.get('published_at') or job.get('created_at') or getattr(document, 'create_time', None)
+        job['posted_at'] = posted if isinstance(posted, datetime) else None
+        all_jobs.append(job)
+    lat, lon = request.GET.get('lat'), request.GET.get('lon')
+    if lat and lon:
         try:
-            all_jobs = filter_jobs_by_proximity(float(user_lat), float(user_lon), all_jobs)
-        except ValueError:
+            lat, lon = float(lat), float(lon)
+            if isfinite(lat) and isfinite(lon) and -90 <= lat <= 90 and -180 <= lon <= 180:
+                all_jobs = filter_jobs_by_proximity(lat, lon, all_jobs)
+        except (TypeError, ValueError):
             pass
-
-    context = {
-        'jobs': all_jobs,
-        'keyword': keyword,
-        'category_filter': category_filter,
-        'location_filter': location_filter
-    }
-    return render(request, 'jobs/job_search.html', context)
+    if sort == 'title':
+        all_jobs.sort(key=lambda job: str(job.get('title') or '').casefold())
+    else:
+        all_jobs.sort(key=lambda job: job['posted_at'].timestamp() if job['posted_at'] else 0, reverse=True)
+    return render(request, 'jobs/job_search.html', {
+        'jobs': all_jobs, 'keyword': keyword, 'category_filter': category_filter,
+        'location_filter': location_filter, 'job_types': job_types, 'selected_type': selected_type, 'sort': sort})
 
 @role_required(allowed_roles=['job_seeker'])
 def job_recommendations(request):
@@ -129,8 +134,8 @@ def job_detail(request, job_id):
     
     if user_email and request.session.get('user_role') == 'job_seeker':
         existing_app = db.collection('applications')\
-            .where('job_id', '==', job_id)\
-            .where('applicant_email', '==', user_email).get()
+            .where(filter=FieldFilter('job_id', '==', job_id))\
+            .where(filter=FieldFilter('applicant_email', '==', user_email)).get()
         already_applied = len(existing_app) > 0
 
     return render(request, 'jobs/job_detail.html', {

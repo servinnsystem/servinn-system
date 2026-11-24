@@ -1,14 +1,12 @@
-import json
-import base64
 from django.shortcuts import render, redirect  # type: ignore
 from django.contrib import messages  # type: ignore
 from django.http import JsonResponse  # type: ignore
 from django.utils import timezone
 from django.views.decorators.cache import never_cache
-from servinn_core.firebase_config import db  # type: ignore
+from servinn_core.firestore_config import db  # type: ignore
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.hashers import make_password
-from google.api_core.exceptions import AlreadyExists
+from servinn_core.firestore_config import AlreadyExists
 from .passwords import verify_account_password
 
 def landing_page(request):
@@ -25,8 +23,13 @@ def login_view(request):
             messages.error(request, "Please fill in all fields.")
             return render(request, 'accounts/login.html')
 
-        user_ref = db.collection('users').document(email)
-        snapshot = user_ref.get()
+        try:
+            user_ref = db.collection('users').document(email)
+            snapshot = user_ref.get()
+        except Exception as error:
+            from .database_errors import database_error_message
+            messages.error(request, database_error_message(error))
+            return render(request, 'accounts/login.html', status=503)
         if snapshot.exists:
             user_data = snapshot.to_dict()
 
@@ -68,12 +71,14 @@ def login_view(request):
 
     return render(request, 'accounts/login.html')
 
-def register_view(request):
-    """Renders the account registration page."""
-    return render(request, 'accounts/register.html')
+def _registration_response(request, role='job_seeker', status=200):
+    return render(request, 'accounts/register.html', {'registration_role': role}, status=status)
+
 
 def register_seeker(request):
     """Processes Job Seeker registration POST requests and redirects to Login page."""
+    if request.method == 'GET' and request.GET.get('role') == 'employer':
+        return register_employer(request)
     if request.method == "POST":
         first_name = request.POST.get('first_name', '').strip()
         middle_name = request.POST.get('middle_name', '').strip()
@@ -95,14 +100,14 @@ def register_seeker(request):
             validate_respectful_text(skills)
         except ValidationError as error:
             messages.error(request, error.messages[0])
-            return render(request, 'accounts/register.html')
+            return _registration_response(request)
 
         if not email or not password:
             messages.error(request, "Email and password are required.")
-            return render(request, 'accounts/register.html')
+            return _registration_response(request)
 
         try:
-            # Store initial Job Seeker Data in Firestore
+            # Store initial Job Seeker data in Firestore
             seeker_data = {
                 'first_name': first_name,
                 'middle_name': middle_name,
@@ -124,13 +129,14 @@ def register_seeker(request):
 
         except AlreadyExists:
             messages.error(request, 'An account with this email already exists. Please sign in.')
-            return render(request, 'accounts/register.html')
-        except Exception:
-            messages.error(request, 'Registration failed. Please try again.')
-            return render(request, 'accounts/register.html')
+            return _registration_response(request)
+        except Exception as error:
+            from .database_errors import report_registration_error
+            messages.error(request, report_registration_error(error))
+            return _registration_response(request, status=503)
 
     # Fix for ERR_TOO_MANY_REDIRECTS: render template directly on GET request
-    return render(request, 'accounts/register.html')
+    return _registration_response(request)
 
 def register_employer(request):
     """Processes Employer registration POST requests and redirects to Login page."""
@@ -147,11 +153,11 @@ def register_employer(request):
             validate_respectful_text(location)
         except ValidationError as error:
             messages.error(request, error.messages[0])
-            return render(request, 'accounts/register.html')
+            return _registration_response(request, 'employer')
 
         if not email or not password:
             messages.error(request, "Email and password are required.")
-            return render(request, 'accounts/register.html')
+            return _registration_response(request, 'employer')
 
         try:
             employer_data = {
@@ -170,17 +176,18 @@ def register_employer(request):
 
         except AlreadyExists:
             messages.error(request, 'An account with this email already exists. Please sign in.')
-            return render(request, 'accounts/register.html')
-        except Exception:
-            messages.error(request, 'Employer registration failed. Please try again.')
-            return render(request, 'accounts/register.html')
+            return _registration_response(request, 'employer')
+        except Exception as error:
+            from .database_errors import report_registration_error
+            messages.error(request, report_registration_error(error))
+            return _registration_response(request, 'employer', status=503)
 
     # Fix for ERR_TOO_MANY_REDIRECTS: render template directly on GET request
-    return render(request, 'accounts/register.html')
+    return _registration_response(request, 'employer')
 
 @never_cache
 def create_profile(request):
-    """Handles profile verification form submission and uploads files to Firestore."""
+    """Handles profile verification form submission and uploads file metadata to Firestore."""
     from jobs.categories import skill_category_choices, category_from_skills, normalize_skills
     user_email = request.session.get('user_email')
 
@@ -220,7 +227,9 @@ def create_profile(request):
             for field, errors in verification.errors.items():
                 for error in errors:
                     messages.error(request, f"{verification.fields[field].label or field.replace('_', ' ').title()}: {error}")
-            return render(request, 'accounts/create_profile.html', profile_context(request.POST))
+            context = profile_context(request.POST)
+            context['profile_error_fields'] = list(verification.errors)
+            return render(request, 'accounts/create_profile.html', context)
         contact_number = verification.cleaned_data['contact_number']
         skills = verification.cleaned_data['skills']
 
@@ -297,75 +306,66 @@ def jobseeker_dashboard(request):
     """Preserve old bookmarks through the protected dashboard route."""
     return redirect('jobseeker_dashboard')
 
+@never_cache
 def google_login(request):
-    return social_login(request, expected_provider='google.com')
-
-
-def social_login(request, expected_provider):
-    """Create a Django session only after Firebase verifies the provider token."""
-    from firebase_admin import auth
-    from django.urls import reverse
-
-    if request.method != 'POST':
-        return JsonResponse({'message': 'POST required.'}, status=405)
+    from .google_oauth import authorization, OAuthError
+    from django.http import HttpResponseNotAllowed
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
     try:
-        data = json.loads(request.body)
-        token = data.get('id_token') if isinstance(data, dict) else None
-        if not isinstance(token, str) or not token:
-            raise ValueError('Missing token')
-    except (ValueError, UnicodeDecodeError):
-        return JsonResponse({'message': 'A Firebase sign-in token is required.'}, status=400)
-    try:
-        claims = auth.verify_id_token(token, check_revoked=True)
+        destination = authorization(request)
+    except OAuthError as error:
+        messages.error(request, str(error))
+        return redirect('login')
     except Exception:
-        return JsonResponse({'message': 'Unable to verify sign-in. Please try again.'}, status=401)
-    if claims.get('firebase', {}).get('sign_in_provider') != expected_provider:
-        return JsonResponse({'message': 'The sign-in provider does not match.'}, status=401)
-    email = (claims.get('email') or '').strip().lower()
-    uid = claims.get('uid') or claims.get('sub')
-    if not email or not uid:
-        return JsonResponse({'message': 'Your Google account must share an email address to continue.'}, status=400)
+        messages.error(request, 'Google OAuth settings could not be loaded. Contact the administrator.')
+        return redirect('login')
+    response = redirect(destination)
+    response['Referrer-Policy'] = 'no-referrer'
+    return response
+
+
+@never_cache
+def google_callback(request):
+    from .google_oauth import exchange, OAuthError
+    from .email_auth import issue, EmailAuthError
+    from django.http import HttpResponseNotAllowed
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
     try:
-        user_ref = db.collection('users').document(email)
-        snapshot = user_ref.get()
+        claims, role = exchange(request)
+        email, subject = claims['email'].strip().lower(), claims['sub']
+        snapshot = db.collection('users').document(email).get()
         if snapshot.exists:
             user_data = snapshot.to_dict()
-            # Existing email accounts require a verified address or an already bound UID.
-            if user_data.get('firebase_uid'):
-                if user_data['firebase_uid'] != uid:
-                    return JsonResponse({'message': 'This email is linked to another sign-in account.'}, status=403)
-            elif not claims.get('email_verified'):
-                return JsonResponse({'message': 'Verify your provider email before signing into this existing account.'}, status=403)
             if user_data.get('role') not in ('job_seeker', 'employer'):
-                return JsonResponse({'message': 'Use the administrator login for this account.'}, status=403)
+                raise OAuthError('Use the administrator login for this account.')
+            if user_data.get('google_sub') and user_data['google_sub'] != subject:
+                raise OAuthError('This email is linked to another Google account.')
         else:
-            role = request.GET.get('role', 'job_seeker')
-            if role not in ('job_seeker', 'employer'):
-                return JsonResponse({'message': 'Invalid account type.'}, status=400)
-            user_data = {
-                'email': email, 'full_name': claims.get('name') or email.split('@')[0],
-                'first_name': (claims.get('name') or '').split(' ', 1)[0],
-                'last_name': (claims.get('name') or '').split(' ', 1)[1] if ' ' in (claims.get('name') or '') else '',
-                'firebase_uid': uid, 'role': role, 'auth_provider': expected_provider,
-                'verified': False, 'profile_completed': False, 'clearance_status': 'Pending',
-                'created_at': timezone.now(),
-            }
-    except Exception:
-        return JsonResponse({'message': 'Unable to load your account. Please try again.'}, status=503)
-
-    from .email_auth import issue, EmailAuthError
-    try:
-        challenge = issue({'email': email, 'uid': uid, 'user_data': user_data,
-                           'email_verified': bool(claims.get('email_verified'))})
-    except EmailAuthError as error:
-        return JsonResponse({'message': str(error)}, status=error.status)
+            name = claims.get('name') or email.split('@')[0]
+            user_data = {'email': email, 'full_name': name, 'first_name': name.split(' ', 1)[0],
+                         'last_name': name.split(' ', 1)[1] if ' ' in name else '', 'google_sub': subject,
+                         'auth_provider': 'google', 'role': role, 'verified': False,
+                         'profile_completed': False, 'clearance_status': 'Pending', 'created_at': timezone.now()}
+        challenge = issue({'email': email, 'uid': subject, 'auth_flow': 'google_oauth',
+                           'user_data': user_data, 'email_verified': True})
+    except (OAuthError, EmailAuthError) as error:
+        messages.error(request, str(error))
+        return redirect('login')
+    except Exception as error:
+        from .database_errors import database_error_message
+        messages.error(request, database_error_message(error))
+        return redirect('login')
     old_challenge = request.session.get('google_email_challenge')
     if old_challenge:
         from django.core.cache import cache
         cache.delete('email-auth:challenge:' + old_challenge)
     request.session.flush()
     request.session['google_email_challenge'] = challenge
-    return JsonResponse({'status': 'verification_required', 'redirect_url': reverse('verify_google_email')})
+    response = redirect('verify_google_email')
+    response['Referrer-Policy'] = 'no-referrer'
+    return response
 
 
 def verify_google_email(request):
@@ -374,6 +374,8 @@ def verify_google_email(request):
     token = request.session.get('google_email_challenge')
     try:
         pending = pending_for(token)
+        if pending.get('auth_flow') != 'google_oauth':
+            raise EmailAuthError('Please start Google sign-in again.')
     except EmailAuthError:
         messages.error(request, 'Please start Google sign-in again to receive a new code.')
         return redirect('login')
@@ -392,9 +394,9 @@ def verify_google_email(request):
             if snapshot.exists:
                 user_data = snapshot.to_dict()
                 if (user_data.get('role') not in ('job_seeker', 'employer')
-                        or (user_data.get('firebase_uid') and user_data['firebase_uid'] != verified['uid'])):
+                        or (user_data.get('google_sub') and user_data['google_sub'] != verified['uid'])):
                     raise EmailAuthError('This account cannot be used for this Google sign-in.', 403)
-                user_ref.update({'firebase_uid': verified['uid'], 'email_verified': True})
+                user_ref.update({'google_sub': verified['uid'], 'auth_provider': 'google', 'email_verified': True})
             else:
                 user_data = verified['user_data']
                 user_data['email_verified'] = True
@@ -477,50 +479,4 @@ def profile_file(request, email, kind):
 
 
 def phone_login(request):
-    import re
-    from firebase_admin import auth
-    from django.urls import reverse
-    if request.method != 'POST':
-        return JsonResponse({'message': 'POST required.'}, status=405)
-    try:
-        data = json.loads(request.body)
-        token = data.get('id_token') if isinstance(data, dict) else None
-        if not isinstance(token, str) or not token:
-            raise ValueError()
-    except (ValueError, UnicodeDecodeError):
-        return JsonResponse({'message': 'A verified phone sign-in token is required.'}, status=400)
-    try:
-        claims = auth.verify_id_token(token, check_revoked=True)
-    except Exception:
-        return JsonResponse({'message': 'Phone verification failed. Please sign in again.'}, status=401)
-    phone = claims.get('phone_number', '')
-    uid = claims.get('uid') or claims.get('sub')
-    if claims.get('firebase', {}).get('sign_in_provider') != 'phone' or not uid or not re.fullmatch(r'\+639\d{9}', phone):
-        return JsonResponse({'message': 'Verify a Philippine mobile number to continue.'}, status=401)
-    # Stable account key; never link an account using an unverified contact field.
-    key = 'phone:' + phone
-    try:
-        ref = db.collection('users').document(key)
-        snapshot = ref.get()
-        if snapshot.exists:
-            user = snapshot.to_dict()
-            if user.get('firebase_uid') != uid or user.get('role') not in ('job_seeker', 'employer'):
-                return JsonResponse({'message': 'This phone identity cannot access this account.'}, status=403)
-        else:
-            role = request.GET.get('role', 'job_seeker')
-            if role not in ('job_seeker', 'employer'):
-                return JsonResponse({'message': 'Invalid account type.'}, status=400)
-            user = {'email': '', 'phone_number': phone, 'contact_number': phone,
-                    'phone_verified': True, 'firebase_uid': uid, 'role': role,
-                    'auth_provider': 'phone', 'full_name': '', 'verified': False,
-                    'profile_completed': False, 'clearance_status': 'Pending'}
-            ref.create(user)
-    except Exception:
-        return JsonResponse({'message': 'Unable to load your account. Please try again.'}, status=503)
-    request.session.flush()
-    request.session['user_email'] = key
-    request.session['user_role'] = user['role']
-    request.session['user_name'] = user.get('full_name') or user.get('company_name', '')
-    request.session['login_phone'] = phone
-    destination = 'create_profile' if not user.get('profile_completed') else ('employer_dashboard' if user['role'] == 'employer' else 'jobseeker_dashboard')
-    return JsonResponse({'redirect_url': reverse(destination)})
+    return JsonResponse({'message': 'Phone sign-in has been retired. Use email/password or Google sign-in.'}, status=410)

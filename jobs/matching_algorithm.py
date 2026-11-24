@@ -1,6 +1,7 @@
+from servinn_core.firestore_config import FieldFilter
 from jobs.publication import is_published
 # jobs/matching_algorithm.py
-from servinn_core.firebase_config import db # type: ignore
+from servinn_core.firestore_config import db # type: ignore
 from difflib import SequenceMatcher
 import re
 
@@ -26,7 +27,7 @@ def generate_smart_matches(seeker_email):
     seeker_skills = set([s.lower() for s in seeker.get('skills', [])])
     seeker_category = seeker.get('category_preference', '').lower()
 
-    jobs_ref = db.collection('job_postings').where('status', '==', 'Active').stream()
+    jobs_ref = db.collection('job_postings').where(filter=FieldFilter('status', '==', 'Active')).stream()
     matched_results = []
 
     for job in jobs_ref:

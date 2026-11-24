@@ -11,8 +11,8 @@ from servinn_core.moderation import validate_respectful_text
 
 class ModerationTests(SimpleTestCase):
     def test_profanity_threats_and_common_obfuscation_are_blocked(self):
-        for value in ('FUCK', 'asshole', 'f.u.c.k', 'f u c k', 'shiiiit', 'sh1t', 'sh!t',
-                      'putang ina', 'g4g0', 'buang', 'yawa', 'pisti', 'piste',
+        for value in ('FUCK', 'asshole', 'assholes', 'fucked', 'fuckers', 'shitty', 'bitches', 'f.u.c.k', 'f u c k', 'shiiiit', 'sh1t', 'sh!t',
+                      'putang ina', 'putanginamo', 'tangina mo', '_fuck_', 'fuck_you', 'you_gago', 'g4g0', 'buang', 'yawa', 'pisti', 'piste',
                       'I will kill you', 'papatayin kita', 'patyon taka',
                       'f\u200buck', '\uff46\uff55\uff43\uff4b', 'sh\u00edt'):
             with self.subTest(value=value):
@@ -22,7 +22,7 @@ class ModerationTests(SimpleTestCase):
     def test_legitimate_names_places_and_work_terms_are_allowed(self):
         for value in ('Assistant in Scunthorpe', 'Class assistant', 'Passionate tutor',
                       'Pangasinan', 'Batangas', 'Dumangas',
-                      'Install a brass fitting', 'Nanny, Cooking', 'Ana Reyes'):
+                      'Install a brass fitting', 'Nanny, Cooking', 'Ana Reyes', 'class_assistant', 'Scunthorpe_tutor'):
             with self.subTest(value=value):
                 validate_respectful_text(value)
 

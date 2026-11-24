@@ -2,11 +2,11 @@ from jobs.publication import is_published
 import base64
 from django.shortcuts import render, redirect  # type: ignore
 from django.contrib import messages  # type: ignore
-from firebase_admin import firestore  # type: ignore
-from google.cloud.firestore_v1.base_query import FieldFilter  # type: ignore
+from servinn_core.firestore_config import SERVER_TIMESTAMP, ArrayUnion  # type: ignore
+from servinn_core.firestore_config import FieldFilter  # type: ignore
 
 from accounts.decorators import role_required
-from servinn_core.firebase_config import db  # type: ignore
+from servinn_core.firestore_config import db  # type: ignore
 from .forms import ProfileSettingsForm
 
 
@@ -30,7 +30,7 @@ def rate_job(request, job_id):
         return redirect('jobseeker_dashboard')
     try:
         ref.collection('ratings').document(rating_key(account)).set({
-            'value': int(value), 'updated_at': firestore.SERVER_TIMESTAMP})
+            'value': int(value), 'updated_at': SERVER_TIMESTAMP})
     except Exception:
         messages.error(request, 'Unable to save your rating. Please try again.')
     else:
@@ -305,8 +305,8 @@ def apply_job(request, job_id):
         'applicant_email': user_email,
         'applicant_name': user_data.get('full_name', 'Job Seeker'),
         'status': 'Application Submitted',
-        'status_updated_at': firestore.SERVER_TIMESTAMP,
-        'applied_at': firestore.SERVER_TIMESTAMP
+        'status_updated_at': SERVER_TIMESTAMP,
+        'applied_at': SERVER_TIMESTAMP
     }
 
     db.collection('applications').add(app_data)
@@ -316,7 +316,7 @@ def apply_job(request, job_id):
 
 @role_required(allowed_roles=['job_seeker'])
 def delete_application(request, application_id):
-    """Deletes an applied job document from Firestore."""
+    """Deletes an applied job record from Firestore."""
     user_email = request.session.get('user_email')
     if not user_email:
         return redirect('login')
@@ -427,7 +427,7 @@ def toggle_save_job(request, job_id):
         db.collection('saved_jobs').add({
             'user_email': user_email,
             'job_id': job_id,
-            'saved_at': firestore.SERVER_TIMESTAMP
+            'saved_at': SERVER_TIMESTAMP
         })
         messages.success(request, "Job saved successfully.")
 

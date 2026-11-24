@@ -1,8 +1,10 @@
 from django.urls import path
 from . import views
+from .signin_settings import signin_settings
 from accounts.views import admin_login
 
 urlpatterns = [
+    path('sign-in-settings/', signin_settings, name='admin_signin_settings'),
     path('jobs/', views.manage_jobs, name='admin_manage_jobs'),
     path('login/', admin_login, name='portal_admin_login'),
     # Maps /portal-admin/ directly to the dashboard view

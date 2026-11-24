@@ -4,6 +4,7 @@ Django settings for SERVINN_SYSTEM project.
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 
 # ============================================================
@@ -11,6 +12,16 @@ from pathlib import Path
 # ============================================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
+
+# Reload development configuration when the local .env file is saved.
+def _watch_environment_file(sender, **kwargs):
+    sender.extra_files.add(BASE_DIR / '.env')
+
+from django.utils.autoreload import autoreload_started
+ar_signal_id = 'servinn.watch-environment-file'
+autoreload_started.connect(_watch_environment_file, dispatch_uid=ar_signal_id, weak=False)
+
 
 
 # ============================================================
@@ -52,7 +63,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'accounts.middleware.GooglePopupPolicyMiddleware',
+    'accounts.middleware.FriendlyErrorMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -102,12 +113,8 @@ ASGI_APPLICATION = 'servinn_core.asgi.application'
 # DATABASE
 # ============================================================
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# Django's administrator accounts and sessions use SQLite; application data uses Firestore.
+DATABASES = {'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': BASE_DIR / 'db.sqlite3'}}
 
 
 # ============================================================
@@ -180,3 +187,16 @@ EMAIL_TIMEOUT = 15
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'noreply@servinn.local')
+
+
+GOOGLE_OAUTH_CLIENT_ID = os.getenv('GOOGLE_OAUTH_CLIENT_ID') or os.getenv('AUTH_GOOGLE_ID', '')
+GOOGLE_OAUTH_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET') or os.getenv('AUTH_GOOGLE_SECRET', '')
+GOOGLE_OAUTH_REDIRECT_URI = os.getenv('GOOGLE_OAUTH_REDIRECT_URI', 'http://127.0.0.1:8000/accounts/google-callback/')
+
+# Public contact details for the applicant privacy notice.
+PRIVACY_CONTROLLER_NAME = os.getenv('PRIVACY_CONTROLLER_NAME', 'SERVINN administration')
+PRIVACY_CONTACT_EMAIL = os.getenv('PRIVACY_CONTACT_EMAIL', 'support@servinn.ph')
+
+FIRESTORE_PROJECT_ID = os.getenv('FIRESTORE_PROJECT_ID', '')
+FIRESTORE_CREDENTIALS_FILE = os.getenv('FIRESTORE_CREDENTIALS_FILE', '.runtime/firestore-service-account.json')
+FIRESTORE_DATABASE_ID = os.getenv('FIRESTORE_DATABASE_ID', '(default)')

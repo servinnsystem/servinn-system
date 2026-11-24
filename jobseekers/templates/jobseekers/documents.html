@@ -6,7 +6,7 @@
 <div class="site-language-tools">{% include 'includes/language_picker.html' %}</div>
 <header><a class="brand" href="{% url 'jobseeker_dashboard' %}">{% include 'includes/brand_logo.html' %}SERVINN</a><nav aria-label="Account navigation"><a href="{% url 'profile_setup' %}">My profile</a><a href="{% url 'my_applications' %}">My applications</a></nav></header>
 <main><a href="{% url 'jobseeker_dashboard' %}">&larr; Back to dashboard</a>
-<div class="intro"><p class="eyebrow">Your account / Documents</p><h1>Build a profile employers can trust.</h1><p class="muted">Keep your documents together and upload replacements when needed.</p></div>
+<div class="intro"><p class="eyebrow">Your account / Documents</p><h1>Build a profile employers can trust.</h1><p><a href="{% url 'privacy_policy' %}" target="_blank" rel="noopener">Read the Data Privacy Policy before uploading documents &rarr;</a></p><p class="muted">Keep your documents together and upload replacements when needed.</p></div>
 {% for message in messages %}<p class="notice" role="status">{{ message }}</p>{% endfor %}
 <div class="layout"><div>
 {% if account.admin_notes %}<div class="notice"><strong>Administrator feedback</strong><p>{{ account.admin_notes|linebreaksbr }}</p></div>{% endif %}
