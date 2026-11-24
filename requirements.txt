@@ -7,3 +7,5 @@ python-dotenv==1.2.4
 google-auth==2.56.3
 requests==2.34.2
 google-cloud-firestore==2.34.1
+gunicorn>=23,<27; sys_platform != "win32"
+whitenoise>=6.11,<7
