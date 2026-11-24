@@ -91,7 +91,7 @@ class AcceptanceNotificationTests(SimpleTestCase):
         request = self.request()
         update_applicant_status(request, 'application')
         send.assert_not_called()
-        self.assertTrue(any('configure the Gmail sender account' in str(message) for message in request._messages))
+        self.assertTrue(any('configure the email provider and sender account' in str(message) for message in request._messages))
 
     @patch('employers.notifications.send_mail')
     @patch('employers.views.db')

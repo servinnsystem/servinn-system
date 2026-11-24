@@ -10,6 +10,14 @@ class Command(BaseCommand):
     help = 'Check SMTP connection and credentials without sending an email.'
 
     def handle(self, *args, **options):
+        if settings.EMAIL_BACKEND == 'accounts.brevo_backend.EmailBackend':
+            from accounts.mail_settings import delivery_options
+            try:
+                delivery_options()
+            except ValueError as error:
+                raise CommandError(str(error)) from None
+            self.stdout.write(self.style.SUCCESS('Brevo HTTPS configuration is present. No email was sent; live delivery is not verified.'))
+            return
         if settings.EMAIL_BACKEND != 'django.core.mail.backends.smtp.EmailBackend':
             raise CommandError('Select the SMTP email backend to check live email delivery.')
         try:

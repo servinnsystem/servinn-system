@@ -39,6 +39,10 @@ def save_mail(sender, password):
 
 
 def delivery_options():
+    if settings.EMAIL_BACKEND == 'accounts.brevo_backend.EmailBackend':
+        if not getattr(settings, 'BREVO_API_KEY', '') or not settings.DEFAULT_FROM_EMAIL or settings.DEFAULT_FROM_EMAIL.endswith('@servinn.local'):
+            raise ValueError('Configure BREVO_API_KEY and DEFAULT_FROM_EMAIL with a verified Brevo sender in Render Environment.')
+        return {}
     if settings.EMAIL_BACKEND != 'django.core.mail.backends.smtp.EmailBackend':
         return {}
     config = load_mail()

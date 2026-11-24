@@ -22,7 +22,7 @@ def send_acceptance_email(reference, application):
     try:
         options = delivery_options()
     except Exception:
-        raise AcceptanceEmailError('The administrator must configure the Gmail sender account in Administration > Sign-in settings.') from None
+        raise AcceptanceEmailError('The administrator must configure the email provider and sender account.') from None
     title = application.get('job_title') or 'the position you applied for'
     company = application.get('company_name') or 'the employer'
     name = application.get('applicant_name') or 'Applicant'

@@ -2,7 +2,7 @@
 
 This configuration is a preview, not durable hosting. Firestore stays remote, but the local SQLite administrator accounts, sessions and uploaded files can disappear after a restart or deployment. Existing Firestore file metadata does not transfer files from your PC. Use test accounts and sample files only; do not upload real identity documents.
 
-Render Free blocks Gmail SMTP ports. Email codes, the required code after Google OAuth, and hiring emails will not work with the existing Gmail SMTP implementation on this plan. Do not bypass email verification to work around this.
+Render Free blocks Gmail SMTP ports. Configure the supported Brevo HTTPS backend using [Brevo email setup](BREVO_EMAIL_SETUP.md) to send verification codes and hiring emails. Do not bypass email verification to work around email configuration.
 
 ## Push the prepared files
 
@@ -39,7 +39,7 @@ Add the exact HTTPS callback URL to the Google OAuth client's authorized redirec
 
 ## After deployment
 
-Open the public site, check CSS and images, view Privacy Policy and test job search. The preview connects to your configured Firestore database, so submitted profile/job changes affect that database. Local administrator accounts are not copied from your PC. A paid hosting plan with persistent storage or external durable replacements is needed before reliable use of administrator accounts and identity uploads. An HTTPS email provider integration is needed for email on Free.
+Open the public site, check CSS and images, view Privacy Policy and test job search. The preview connects to your configured Firestore database, so submitted profile/job changes affect that database. Local administrator accounts are not copied from your PC. A paid hosting plan with persistent storage or external durable replacements is needed before reliable use of administrator accounts and identity uploads. Configure the Brevo HTTPS email backend described above for email on Free.
 
 References:
 - https://render.com/docs/deploy-django

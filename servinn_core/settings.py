@@ -180,6 +180,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication emails. Set these in the server environment; never commit secrets.
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+BREVO_API_KEY = os.getenv('BREVO_API_KEY', '')
+if os.getenv('SERVINN_EMAIL_PROVIDER', '').strip().lower() == 'brevo':
+    EMAIL_BACKEND = 'accounts.brevo_backend.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = True
