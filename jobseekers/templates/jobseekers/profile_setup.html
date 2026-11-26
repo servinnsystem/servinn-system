@@ -74,6 +74,17 @@
     .skills-options label{display:flex;align-items:center;gap:8px;margin:0;font-weight:400;line-height:1.6;cursor:pointer}
     .skills-options input[type=checkbox]{width:17px;height:17px;padding:0;margin:0;accent-color:#315a46;flex-shrink:0}
   .skills-fieldset{border:0;padding:0;margin:0;min-width:0}.skills-fieldset legend{padding:0;margin-bottom:8px;font-size:inherit;font-weight:600}
+
+    .checklist-items{list-style:none;padding:0;margin:18px 0;display:grid;gap:16px}
+    .checklist-items li{display:flex;gap:10px;align-items:flex-start}
+    .checklist-items strong{display:block;font-size:12px;line-height:1.5}
+    .checklist-items small{font-size:11px;margin-top:3px;line-height:1.6}
+    .check-indicator{display:grid;place-items:center;width:24px;height:24px;border:1px solid #d9e3d2;border-radius:50%;background:#f3f7ed;color:#74856b;flex-shrink:0;font-weight:700}
+    .check-indicator.done{background:#e3f0db;border-color:#c4dbb4;color:#315a46}
+    .resume-download{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:44px;padding:12px 10px;border:1px solid #ceddc5;border-radius:10px;background:#edf5e6;color:#315a46;font-size:12px;font-weight:600;line-height:1.6;text-align:center;transition:background .15s,box-shadow .15s}
+    .resume-download:hover{background:#dfeaD4;box-shadow:0 3px 8px #203e3410}
+    .resume-download svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+    @media(prefers-reduced-motion:reduce){.resume-download{transition:none}}
 </style>
   {% include 'includes/skills_dropdown_assets.html' %}
 </head>
@@ -118,11 +129,17 @@
           </nav>
         </div>
 
-        <div class="card">
+        <div class="card profile-checklist">
           <h2>Profile checklist</h2>
-          <p class="muted">Add a city or municipality, relevant skills, and recent work experience. Include training or certifications that support your application.</p>
+          <p class="muted">Help employers understand what you offer.</p>
+          <ul class="checklist-items">
+            <li><span class="check-indicator {% if user_data.location or user_data.city_municipality %}done{% endif %}" aria-hidden="true">{% if user_data.location or user_data.city_municipality %}&#10003;{% else %}+{% endif %}</span><span><strong>City or municipality</strong><small>{% if user_data.location or user_data.city_municipality %}Added to your profile{% else %}Add where you are based{% endif %}</small></span></li>
+            <li><span class="check-indicator {% if user_data.skills %}done{% endif %}" aria-hidden="true">{% if user_data.skills %}&#10003;{% else %}+{% endif %}</span><span><strong>Relevant skills</strong><small>{% if user_data.skills %}Added to your profile{% else %}Select the work you can do{% endif %}</small></span></li>
+            <li><span class="check-indicator {% if user_data.experience %}done{% endif %}" aria-hidden="true">{% if user_data.experience %}&#10003;{% else %}+{% endif %}</span><span><strong>Work experience</strong><small>{% if user_data.experience %}Added to your profile{% else %}Describe your recent work{% endif %}</small></span></li>
+            <li><span class="check-indicator {% if user_data.certifications %}done{% endif %}" aria-hidden="true">{% if user_data.certifications %}&#10003;{% else %}+{% endif %}</span><span><strong>Training &amp; certificates</strong><small>{% if user_data.certifications %}Added to your profile{% else %}Include qualifications, if any{% endif %}</small></span></li>
+          </ul>
           {% if user_data.resume_document_file %}
-            <a class="document" href="{% url 'profile_file' request.session.user_email 'resume_document' %}">Download current resume</a>
+            <a class="resume-download" href="{% url 'profile_file' request.session.user_email 'resume_document' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg>Download current resume</a>
           {% endif %}
           {% if user_data.admin_notes %}
             <p class="muted"><strong>Review notes</strong><br>{{ user_data.admin_notes }}</p>
