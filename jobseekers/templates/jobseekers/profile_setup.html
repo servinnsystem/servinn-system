@@ -12,7 +12,14 @@
     header{background:white;border-bottom:1px solid #e0e8e1;padding:24px 5%;display:flex;justify-content:space-between;align-items:center;gap:20px}
     .brand{font-size:25px;font-weight:800;letter-spacing:-1px}
     .brand span{color:#86a939}
-    nav{display:flex;gap:24px;font-size:12px}
+    header nav{display:flex;gap:10px;flex-wrap:wrap;font-size:13px}
+    header nav a{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:11px 18px;border:1px solid #d5e1d8;border-radius:10px;background:#f4f8f2;color:#315a46;font-weight:600;transition:background .15s,box-shadow .15s}
+    header nav a:first-child{background:#315a46;color:white;border-color:#315a46}
+    header nav a:hover{background:#e5eee0;box-shadow:0 3px 10px #203e3412}
+    header nav a:first-child:hover{background:#234a3b}
+    header nav svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+    @media(max-width:450px){header nav{width:100%}header nav a{flex:1;padding:11px 12px}}
+    @media(prefers-reduced-motion:reduce){header nav a{transition:none}}
     main{max-width:1140px;margin:40px auto;padding:0 24px 35px}
     h1{font-size:32px;letter-spacing:-1px;margin:10px 0}
     h2{font-size:18px;margin:0}
@@ -75,8 +82,8 @@
   <header>
     <a class="brand" href="{% url 'jobseeker_dashboard' %}">{% include 'includes/brand_logo.html' %}SERVINN</a>
     <nav aria-label="Main site navigation">
-      <a href="{% url 'jobseeker_dashboard' %}">Find jobs</a>
-      <a href="{% url 'my_applications' %}">My applications</a>
+      <a href="{% url 'jobseeker_dashboard' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg>Find jobs</a>
+      <a href="{% url 'my_applications' %}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 10h6M9 14h6M9 18h4"/></svg>My applications</a>
     </nav>
   </header>
 
