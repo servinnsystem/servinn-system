@@ -55,7 +55,18 @@
     <section class="card section-card"><h2>Verification workload</h2><p class="muted">Select a status to open matching accounts.</p><div class="status-grid">{% for item in verification_summary %}<a class="status-tile" href="{% url 'manage_users' %}?status={{ item.label|urlencode }}"><strong>{{ item.count }}</strong><span>{{ item.label }}</span></a>{% endfor %}</div></section>
     <section class="card section-card"><h2>Application outcomes</h2><p class="muted">Current decisions across all employer applications.</p>{% for item in application_outcomes %}<div class="outcome-row"><span>{{ item.label }}</span><strong>{{ item.count }}</strong></div>{% endfor %}<a class="button dashboard-action" href="{% url 'system_reports' %}">Open reports &rarr;</a></section>
     <section class="card section-card"><h2>Platform snapshot</h2><a class="button dashboard-action dashboard-action-secondary" href="{% url 'admin_manage_jobs' %}">{{ pending_jobs }} job postings awaiting review &rarr;</a><div class="outcome-row"><span>Active job postings</span><strong>{{ active_jobs }}</strong></div><div class="outcome-row"><span>Incomplete account profiles</span><strong>{{ incomplete_profiles }}</strong></div><p class="muted">Counts reflect the latest database read. Refresh to load new activity.</p><a class="button dashboard-action dashboard-action-secondary" href="{% url 'admin_dashboard' %}">Refresh dashboard <span aria-hidden="true">&#8635;</span></a><small>Updated {{ refreshed_at|date:'M j, Y, g:i a' }}</small></section>
-    <section class="card section-card"><h2>Recent profile decisions</h2><p class="muted">Latest recorded review for each account.</p>{% for account in recent_reviews %}<a class="review-row" href="{% url 'manage_users' %}?q={{ account.email|urlencode }}"><strong>{{ account.company_name|default:account.full_name|default:account.email }}</strong><span>{{ account.clearance_status }}</span><small>{{ account.reviewed_at|date:'M j, Y, g:i a' }} &middot; {{ account.reviewed_by }}</small></a>{% empty %}<p class="muted">No recorded reviews yet. New administrator decisions will appear here.</p>{% endfor %}</section>
+    <section class="card section-card recent-decisions" aria-labelledby="recent-decisions-heading">
+      <div class="decisions-heading"><div><h2 id="recent-decisions-heading">Recent profile decisions</h2><p class="muted">Latest recorded review for each account.</p></div><a class="decisions-all" href="{% url 'manage_users' %}">All accounts <span aria-hidden="true">&rarr;</span></a></div>
+      <div class="decisions-list">
+      {% for account in recent_reviews %}
+        <a class="review-row" href="{% url 'admin_account_profile' account.email %}" aria-label="View {{ account.company_name|default:account.full_name|default:account.email }} profile, {{ account.clearance_status }}">
+          <span class="review-icon" aria-hidden="true">{% if account.clearance_status == 'Verified' %}&#10003;{% elif account.clearance_status == 'Rejected' %}&#215;{% else %}&#9998;{% endif %}</span>
+          <span class="review-content"><strong>{{ account.company_name|default:account.full_name|default:account.email }}</strong><span class="review-meta"><time datetime="{{ account.reviewed_at|date:'c' }}">{{ account.reviewed_at|date:'M j, Y, g:i a' }}</time><span>Reviewed by {{ account.reviewed_by|default:'Administrator' }}</span></span></span>
+          <span class="review-end"><span class="review-status {% if account.clearance_status == 'Verified' %}review-verified{% elif account.clearance_status == 'Rejected' %}review-rejected{% else %}review-correction{% endif %}">{{ account.clearance_status }}</span><span class="review-arrow" aria-hidden="true">&rarr;</span></span>
+        </a>
+      {% empty %}<div class="review-empty"><strong>No decisions yet</strong><p class="muted">Completed profile reviews will appear here.</p></div>{% endfor %}
+      </div>
+    </section>
   </div>
   <style>
     .admin-enhancements{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
@@ -63,8 +74,25 @@
     .status-tile{background:#f2f7ed;border:1px solid #dce7d6;padding:16px;border-radius:11px;display:grid;gap:6px;font-size:12px;text-decoration:none;transition:background .18s,border-color .18s,box-shadow .18s}
     .status-tile strong{font-size:24px}.status-tile:hover{background:#e3edcf;border-color:#8aa989;box-shadow:0 3px 9px #203e340c}
     .outcome-row{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #e7eee5;padding:14px 0;font-size:13px}
-    .review-row{display:grid;gap:5px;padding:14px 0;border-bottom:1px solid #e7eee5;font-size:12px;overflow-wrap:anywhere}
-    .review-row:hover{text-decoration:underline}
+    .decisions-heading{display:flex;justify-content:space-between;align-items:start;gap:16px;margin-bottom:8px}
+    .decisions-heading p{font-size:12px;margin:4px 0 12px}
+    .decisions-all{flex-shrink:0;padding:7px 10px;border:1px solid #dce6dd;background:#f5f8f2;border-radius:8px;font-size:11px;font-weight:600;text-decoration:none;color:#315a46}
+    .decisions-all:hover{background:#e8f0df}
+    .decisions-list{display:grid;gap:9px}
+    .review-row{display:flex;align-items:center;gap:12px;padding:15px 12px;border:1px solid #e4ece5;border-radius:11px;background:#fbfdfa;color:#203e34;font-size:13px;text-decoration:none;transition:background .15s,border-color .15s,box-shadow .15s}
+    .review-row:hover{background:#f0f6e9;border-color:#abc397;box-shadow:0 3px 8px #203e340a;text-decoration:none}
+    .review-row:focus-visible,.decisions-all:focus-visible{outline:3px solid #83a66d;outline-offset:3px}
+    .review-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#eaf0e4;color:#315a46;font-size:18px;flex-shrink:0}
+    .review-content{display:grid;gap:6px;flex:1;min-width:0;overflow-wrap:anywhere}
+    .review-content strong{font-size:13px;line-height:1.5}
+    .review-meta{display:grid;gap:2px;font-size:11px;color:#718278;line-height:1.6}
+    .review-end{display:flex;align-items:center;gap:10px}
+    .review-status{display:inline-block;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:600;line-height:1.5;text-align:center}
+    .review-verified{background:#e6f3e8;color:#28623a}.review-rejected{background:#fbe9e6;color:#9a4236}.review-correction{background:#fff1d6;color:#805b16}
+    .review-arrow{color:#6a826d;font-size:18px}
+    .review-empty{padding:20px;border:1px dashed #dce6dd;border-radius:10px}
+    @media(max-width:550px){.review-row{flex-wrap:wrap}.review-end{margin-left:46px;width:calc(100% - 46px);justify-content:space-between}.decisions-heading{flex-wrap:wrap}}
+    @media(prefers-reduced-motion:reduce){.review-row{transition:none}}
     @media(max-width:800px){.admin-enhancements{grid-template-columns:1fr}}
 
     .page-header {
