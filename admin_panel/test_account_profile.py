@@ -13,8 +13,10 @@ class AccountProfileTests(SimpleTestCase):
             'id_document_back_file': {'path': 'private-back'}, 'selfie_document_file': {'path': 'private-selfie'}}
         response = account_profile(self.request(), 'person@example.com')
         for text in ('Identity verification', 'TEST-ID-123', 'Sample Street, Iloilo',
-                     'Download ID back', 'Download selfie holding ID'):
+                     'Download Valid ID (back)', 'Download Selfie holding ID'):
             self.assertContains(response, text)
+        for kind in ('id_document_back', 'selfie_document'):
+            self.assertContains(response, reverse('profile_file', args=['person@example.com', kind]))
         self.assertNotContains(response, 'private-back')
         self.assertNotContains(response, 'private-selfie')
 

@@ -7,6 +7,22 @@
   .profile-grid dl{margin:0}.profile-grid dt{font-size:12px;color:#718479;margin-top:18px}
   .profile-grid dd{margin:5px 0;white-space:pre-wrap;overflow-wrap:anywhere}
   .profile-review label{display:block;margin:16px 0 6px}.profile-review textarea{width:100%}
+  .account-status-list{display:grid;gap:12px;margin:20px 0;padding:16px;background:#f5f8f2;border:1px solid #e1e9dc;border-radius:12px}
+  .account-status-line{display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:12px}
+  .account-status-line>span:first-child{color:#60776b}
+  .account-status-pill{padding:5px 10px;border-radius:18px;font-size:11px;font-weight:600;background:#fff0d7;color:#805b16}
+  .account-status-pill.complete{background:#e0efdf;color:#2c643c}
+  .account-document-list{display:grid;gap:10px}
+  .account-document{display:flex;align-items:center;gap:12px;padding:14px 12px;border:1px solid #e1e9df;border-radius:11px;background:#fcfdfb}
+  .document-symbol{display:grid;place-items:center;width:34px;height:38px;border-radius:8px;background:#edf3e7;flex-shrink:0}
+  .document-copy{display:grid;gap:5px;flex:1;min-width:0;overflow-wrap:anywhere}
+  .document-copy strong{font-size:12px}.document-copy small{font-size:11px;color:#718479}
+  .document-download{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:9px 12px;border:1px solid #d2e0cd;border-radius:8px;background:#eff5e9;color:#315a46;font-size:11px;font-weight:600;text-decoration:none}
+  .document-download:hover{background:#deebd6;border-color:#91ad83}
+  .document-download:focus-visible{outline:3px solid #83a66d;outline-offset:3px}
+  .document-missing{font-size:10px;color:#718479;background:#edf1ed;border-radius:16px;padding:5px 8px}
+  .documents-note{font-size:12px;color:#718479;line-height:1.7}
+  @media(max-width:480px){.account-document{flex-wrap:wrap}.document-download,.document-missing{margin-left:46px}}
   @media(max-width:850px){.profile-grid{grid-template-columns:1fr}}
 </style>
 <a href="{% url 'manage_users' %}">&larr; Back to accounts</a>
@@ -23,17 +39,22 @@
     {% for row in section.rows %}<dt>{{ row.label }}</dt><dd>{{ row.value }}</dd>{% endfor %}
   </dl></section>
   {% endfor %}
-  <section class="card"><h2>Documents &amp; account status</h2>
-    {% if account.nbi_clearance_file %}<p><a href="{% url 'profile_file' account_id 'nbi_clearance' %}">Download NBI clearance</a></p>{% endif %}
-    {% if account.police_clearance_file %}<p><a href="{% url 'profile_file' account_id 'police_clearance' %}">Download police clearance</a></p>{% endif %}
-    {% if account.barangay_clearance_file %}<p><a href="{% url 'profile_file' account_id 'barangay_clearance' %}">Download barangay clearance</a></p>{% endif %}
-    <p>Profile setup: {{ account.profile_completed|yesno:'Complete,Incomplete' }}</p>
-    <p>Phone verified: {{ account.phone_verified|yesno:'Yes,No' }}</p>
-    <p>ID type: {{ account.id_type|default:'Not provided' }}</p>
-    <p>{% if account.id_document_file %}<a href="{% url 'profile_file' account_id 'id_document' %}">Download ID document</a>{% else %}No downloadable ID document.{% endif %}</p>
-    {% if account.id_document_back_file %}<p><a href="{% url 'profile_file' account_id 'id_document_back' %}">Download ID back</a></p>{% endif %}
-    {% if account.selfie_document_file %}<p><a href="{% url 'profile_file' account_id 'selfie_document' %}">Download selfie holding ID</a></p>{% endif %}
-    <p>{% if account.resume_document_file %}<a href="{% url 'profile_file' account_id 'resume_document' %}">Download resume</a>{% else %}No resume uploaded.{% endif %}</p>
+  <section class="card" aria-labelledby="account-documents-heading"><h2 id="account-documents-heading">Documents &amp; account status</h2>
+    <p class="documents-note">Review the account details and download submitted documents.</p>
+    <div class="account-status-list">
+      <div class="account-status-line"><span>Profile setup</span><span class="account-status-pill {% if account.profile_completed %}complete{% endif %}">{{ account.profile_completed|yesno:'Complete,Incomplete' }}</span></div>
+      <div class="account-status-line"><span>Phone verification</span><span class="account-status-pill {% if account.phone_verified %}complete{% endif %}">{{ account.phone_verified|yesno:'Verified,Not verified' }}</span></div>
+      <div class="account-status-line"><span>ID type</span><strong>{{ account.id_type|default:'Not provided' }}</strong></div>
+    </div>
+    <div class="account-document-list">
+      {% include 'admin_panel/document_item.html' with label='Valid ID (front)' kind='id_document' document=account.id_document_file %}
+      {% include 'admin_panel/document_item.html' with label='Valid ID (back)' kind='id_document_back' document=account.id_document_back_file %}
+      {% include 'admin_panel/document_item.html' with label='Selfie holding ID' kind='selfie_document' document=account.selfie_document_file %}
+      {% include 'admin_panel/document_item.html' with label='Resume' kind='resume_document' document=account.resume_document_file %}
+      {% if account.nbi_clearance_file %}{% include 'admin_panel/document_item.html' with label='NBI clearance' kind='nbi_clearance' document=account.nbi_clearance_file %}{% endif %}
+      {% if account.police_clearance_file %}{% include 'admin_panel/document_item.html' with label='Police clearance' kind='police_clearance' document=account.police_clearance_file %}{% endif %}
+      {% if account.barangay_clearance_file %}{% include 'admin_panel/document_item.html' with label='Barangay clearance' kind='barangay_clearance' document=account.barangay_clearance_file %}{% endif %}
+    </div>
   </section>
   <section class="card profile-review"><h2>Verification review</h2>
     {% if account.reviewed_at %}<p class="muted">Last reviewed {{ account.reviewed_at|date:'M j, Y H:i' }} by {{ account.reviewed_by }}</p>{% endif %}

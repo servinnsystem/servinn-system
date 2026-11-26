@@ -1,0 +1,5 @@
+<div class="account-document">
+  <span class="document-symbol" aria-hidden="true">&#128196;</span>
+  <div class="document-copy"><strong>{{ label }}</strong><small>{% if document %}Uploaded{% else %}Not uploaded{% endif %}</small></div>
+  {% if document %}<a class="document-download" href="{% url 'profile_file' account_id kind %}" aria-label="Download {{ label }}">Download <span aria-hidden="true">&darr;</span></a>{% else %}<span class="document-missing">Unavailable</span>{% endif %}
+</div>
