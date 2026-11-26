@@ -386,6 +386,12 @@
   /* Single-column registration layout. */
     .page { display: flex; justify-content: center; min-height: 100vh; }
     .form-side { width: 100%; max-width: 560px; }
+
+    .top-link a { display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:44px;padding:11px 17px;border:1px solid #cdddcf;border-radius:10px;background:#f9fcf6;color:#315b43;font-size:13px;font-weight:600;line-height:1.5;text-decoration:none;box-shadow:0 2px 5px #21473708;transition:background .15s,border-color .15s,box-shadow .15s; }
+    .top-link a:hover { background:#e7f0df;border-color:#9bb58a;color:#214737;box-shadow:0 3px 9px #21473714; }
+    .top-link a:focus-visible { outline:3px solid #83a66d;outline-offset:4px; }
+    .top-link a:active { box-shadow:none;background:#dce9d2; }
+    @media(prefers-reduced-motion:reduce) { .top-link a { transition:none; } }
   </style>
 </head>
 <body>
