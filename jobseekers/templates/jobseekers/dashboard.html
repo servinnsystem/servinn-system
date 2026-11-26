@@ -207,6 +207,7 @@
         {% for job in recommended_matches %}
           <article class="card">
             <div class="employer-card">
+              <a href="{% url 'job_detail' job.id %}" aria-label="View {{ job.title }} job post by {{ job.employer_info.name }}" title="View job post">
               {% if job.employer_info.has_photo %}
                 <img src="{% url 'job_employer_photo' job.id %}" alt="Employer profile photo" data-fallback-src="{% static 'images/default-avatar.svg' %}">
               {% elif job.employer_info.legacy_photo %}
@@ -214,6 +215,7 @@
               {% else %}
                 <img src="{% static 'images/default-avatar.svg' %}" alt="Employer profile photo">
               {% endif %}
+              </a>
               <div class="employer-summary">
                 <strong data-user-content>{{ job.employer_info.name }}</strong>
                 <dl>
