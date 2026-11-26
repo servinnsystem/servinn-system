@@ -46,7 +46,7 @@ class AcceptanceNotificationTests(SimpleTestCase):
     @patch('employers.notifications.send_mail')
     @patch('employers.views.db')
     def test_no_email_for_other_decisions_or_wrong_owner(self, db, send):
-        for status in ('Reviewed', 'Shortlisted', 'Rejected'):
+        for status in ('Reviewed', 'Shortlisted'):
             self.application(db)
             update_applicant_status(self.request(status), 'application')
         self.application(db, employer_email='other@example.com')
@@ -55,9 +55,11 @@ class AcceptanceNotificationTests(SimpleTestCase):
 
     @patch('employers.notifications.send_mail')
     @patch('employers.views.db')
-    def test_already_sent_acceptance_is_not_resent_on_hiring(self, db, send):
-        self.application(db, status='Accepted', acceptance_email_sent_at=timezone.now())
-        update_applicant_status(self.request('Hired'), 'application')
+    def test_identical_notification_is_not_resent(self, db, send):
+        from employers.notifications import notification_fingerprint
+        details = dict(status='Accepted', candidate_message='Please contact us for your start date.')
+        self.application(db, **details, application_email_fingerprint=notification_fingerprint(details))
+        update_applicant_status(self.request(), 'application')
         send.assert_not_called()
 
     @patch('employers.notifications.send_mail')
@@ -105,3 +107,44 @@ class AcceptanceNotificationTests(SimpleTestCase):
         for name in ('dashboard', 'application_tracker'):
             template = get_template(f'jobseekers/{name}.html')
             self.assertNotIn('includes/application_updates.html', template.template.source)
+
+    @patch('employers.views.db')
+    def test_rejection_email_explains_outcome(self, db):
+        self.application(db)
+        update_applicant_status(self.request('Rejected'), 'application')
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('did not select', mail.outbox[0].body)
+        self.assertNotIn('Congratulations', mail.outbox[0].body)
+
+    @patch('employers.views.db')
+    def test_interview_email_includes_manila_schedule_link_and_message(self, db):
+        ref = self.application(db)
+        request = self.request('Interview Invitation')
+        data = request.POST.copy()
+        data['interview_at'] = '2026-11-30T09:30'
+        data['interview_location'] = 'https://meet.google.com/example'
+        data['candidate_message'] = 'Please bring your resume.'
+        request.POST = data
+        update_applicant_status(request, 'application')
+        self.assertEqual(len(mail.outbox), 1)
+        body = mail.outbox[0].body
+        for text in ('Asia/Manila', '09:30 AM', 'https://meet.google.com/example', 'Please bring your resume.'):
+            self.assertIn(text, body)
+        self.assertEqual(ref.update.call_args.args[0]['application_email_status'], 'Interview Invitation')
+
+    @patch('employers.views.db')
+    def test_hired_has_separate_notification_after_acceptance(self, db):
+        self.application(db, status='Accepted', acceptance_email_sent_at=timezone.now())
+        update_applicant_status(self.request('Hired'), 'application')
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn('marked you hired', mail.outbox[0].body)
+
+    @patch('employers.notifications.send_mail', return_value=1)
+    def test_changed_interview_schedule_can_be_notified(self, send):
+        from employers.notifications import send_application_email, notification_fingerprint
+        application = dict(status='Interview Invitation', applicant_email='applicant@gmail.com', interview_location='Office', interview_at=timezone.now())
+        application['application_email_fingerprint'] = notification_fingerprint(application)
+        self.assertFalse(send_application_email(Mock(), application))
+        application['interview_location'] = 'New office'
+        self.assertTrue(send_application_email(Mock(), application))
+        send.assert_called_once()

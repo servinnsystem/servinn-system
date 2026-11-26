@@ -207,7 +207,7 @@ def view_applicants(request):
 
 @role_required(allowed_roles=['employer'])
 def update_applicant_status(request, app_id):
-    """Save an employer decision, then notify accepted applicants by email."""
+    """Save an employer decision, then notify applicants of the decision by email."""
     if request.method == "POST":
         new_status = request.POST.get('status')
         app_ref = db.collection('applications').document(app_id)
@@ -240,17 +240,17 @@ def update_applicant_status(request, app_id):
                 return redirect('view_applicants')
             else:
                 messages.success(request, 'Candidate updated. Their application tracker will show this decision.')
-        # Retry unsent acceptance emails on a repeated save without changing the decision.
+        # Retry unsent notifications; matching decision details are not sent twice.
         application = current | changes
-        if new_status in ('Accepted', 'Hired') and not current.get('acceptance_email_sent_at'):
-            from .notifications import send_acceptance_email, AcceptanceEmailError
+        if new_status in ('Accepted', 'Hired', 'Rejected', 'Interview Invitation'):
+            from .notifications import send_application_email, ApplicationEmailError
             try:
-                delivered = send_acceptance_email(app_ref, application)
-            except AcceptanceEmailError as error:
-                messages.warning(request, f'Decision saved, but acceptance email needs attention. {error} Save the decision again to retry.')
+                delivered = send_application_email(app_ref, application)
+            except ApplicationEmailError as error:
+                messages.warning(request, f'Decision saved, but notification email needs attention. {error} Save the decision again to retry.')
             else:
                 if delivered:
-                    messages.success(request, 'Acceptance email sent to the applicant.')
+                    messages.success(request, 'The email provider accepted the application notification for delivery.')
 
 
     return redirect('view_applicants')
