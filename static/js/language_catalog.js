@@ -354,4 +354,10 @@ No matching applications|Walang tumutugmang aplikasyon|Wala sing nagakaangay nga
 No applications to display|Walang maipapakitang aplikasyon|Wala sing aplikasyon nga ipakita
 Try a different search or status filter.|Subukan ang ibang paghahanap o filter ng kalagayan.|Tilawi ang iban nga pagpangita ukon filter sang kahimtangan.
 Submitted applications will appear here automatically.|Awtomatikong lalabas dito ang mga isinumiteng aplikasyon.|Awtomatiko nga makita diri ang ginpasa nga mga aplikasyon.
+
+Search applications|Maghanap ng aplikasyon|Mangita sang aplikasyon
+Search my applications|Hanapin ang aking mga aplikasyon|Pangitaa ang akon mga aplikasyon
+Search job title or employer|Maghanap ayon sa titulo ng trabaho o employer|Mangita suno sa titulo sang trabaho ukon employer
+You have been invited to an interview. Open the application details for the schedule and location.|Inimbitahan ka sa panayam. Buksan ang mga detalye ng aplikasyon para sa iskedyul at lokasyon.|Gin-imbitar ka sa interbyu. Buksi ang mga detalye sang aplikasyon para sa iskedyul kag lugar.
+The employer has reviewed your application. Check back for the next decision.|Nasuri na ng employer ang iyong aplikasyon. Balikan ito para sa susunod na desisyon.|Narepaso na sang employer ang imo aplikasyon. Baliki ini para sa masunod nga desisyon.
 `;

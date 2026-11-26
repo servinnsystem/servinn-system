@@ -57,6 +57,21 @@
     header nav svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
     @media(max-width:550px){header nav{width:100%;gap:8px}header nav a{flex:1;padding:10px 12px;font-size:12px}}
     @media(prefers-reduced-motion:reduce){header nav a{transition:none}}
+
+    .heading .button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border-radius:10px;padding:12px 20px}
+    .stats{gap:12px}.stat{position:relative;padding:22px;min-height:115px;box-shadow:0 2px 8px #203e3403}.stat strong{font-size:30px}.stat span{font-size:12px}.stat[aria-current=page]{background:#edf5e3;border-color:#8aa953;box-shadow:0 0 0 1px #8aa953}.stat:hover{background:#f7faf1}
+    .application-stages{display:flex;gap:9px;flex-wrap:wrap;margin:22px 0}
+    .application-stages a{display:inline-flex;align-items:center;gap:9px;min-height:42px;padding:10px 15px;border:1px solid #d7e2d2;border-radius:24px;background:white;color:#315a46;font-size:12px;font-weight:600}
+    .application-stages a:hover{background:#edf4e4}.application-stages a[aria-current=page]{background:#315a46;color:white;border-color:#315a46}
+    .application-search{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 16px}.application-search input{flex:1;min-width:170px;min-height:44px;padding:12px 15px;border:1px solid #d5e2d4;border-radius:10px;background:white;font:inherit;color:#203e34}.application-search button,.application-search .button{min-height:44px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center}
+    .card[data-application-id]{padding:26px;border-radius:16px;box-shadow:0 3px 12px #203e3404}.job-head h2{font-size:21px;overflow-wrap:anywhere}.company{margin-top:5px;font-size:13px}.badge{font-weight:600;line-height:1.5}.badge.hired{background:#dcefdc;color:#28623a}.badge.interview-invitation{background:#eee6fa;color:#67508a}.badge.reviewed{background:#e4eef2;color:#376273}
+    .application-date{display:flex;gap:8px;align-items:center;margin:16px 0;color:#718479;font-size:12px}.application-date svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7}
+    .application-summary{margin:16px 0;padding:14px 16px;border:1px solid #e0e9db;border-radius:10px;background:#f5f9f0;font-size:13px;line-height:1.8}.application-summary p{margin:0}
+    .application-card-actions{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.application-card-actions .button{min-height:42px;border-radius:9px;background:#edf4e5;border:1px solid #d4e1cb;color:#315a46;display:inline-flex;align-items:center;justify-content:center}.application-card-actions .button:hover{background:#dfeaD4}
+    .details summary{display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border:1px solid #e1e8dc;background:#fafcf7;border-radius:9px;min-height:44px;color:#315a46;list-style:none}.details summary::-webkit-details-marker{display:none}.details summary::after{content:'+';font-size:19px}.details[open] summary::after{content:'\2212'}
+    .application-contact{padding:14px;background:#f5f8f1;border-radius:9px;overflow-wrap:anywhere}.application-history{list-style:none;padding:0;margin:18px 0}.application-history li{padding:10px 0 10px 15px;border-left:2px solid #c9dbbc;font-size:12px;line-height:1.8;overflow-wrap:anywhere}
+    .application-delete{border-top:1px solid #e8ece4;margin-top:20px;padding-top:14px}.delete-application button{min-height:42px;border-radius:9px;padding:11px 16px}.delete-application button:hover{border-color:#bf8178}.application-search .clear{background:white;border:1px solid #d5e2d4;color:#315a46}
+    @media(max-width:550px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stat{padding:17px;min-height:100px}.card[data-application-id]{padding:20px}.application-search input{width:100%;flex-basis:100%}.application-search button{flex:1}.application-card-actions a{width:100%}}
   </style>
 </head>
 <body>
@@ -87,67 +102,74 @@
     {% endfor %}
 
     <div class="stats" role="region" aria-label="Application statistics filters">
-      <a class="stat" href="{% url 'my_applications' %}" aria-label="Filter by total applications: {{ total }}">
+      <a class="stat" href="{% url 'my_applications' %}" {% if not selected_status %}aria-current="page"{% endif %} aria-label="Filter by total applications: {{ total }}">
         <strong>{{ total }}</strong>
         <span>Total applications</span>
       </a>
-      <a class="stat" href="?status=Application+Submitted" aria-label="Filter by submitted applications: {{ submitted }}">
+      <a class="stat" href="?status=Application+Submitted" {% if selected_status == 'Application Submitted' %}aria-current="page"{% endif %} aria-label="Filter by submitted applications: {{ submitted }}">
         <strong>{{ submitted }}</strong>
         <span>Submitted</span>
       </a>
-      <a class="stat" href="?status=Shortlisted" aria-label="Filter by shortlisted applications: {{ shortlisted }}">
+      <a class="stat" href="?status=Shortlisted" {% if selected_status == 'Shortlisted' %}aria-current="page"{% endif %} aria-label="Filter by shortlisted applications: {{ shortlisted }}">
         <strong>{{ shortlisted }}</strong>
         <span>Shortlisted</span>
       </a>
-      <a class="stat" href="?status=Accepted" aria-label="Filter by accepted applications: {{ accepted }}">
+      <a class="stat" href="?status=Accepted" {% if selected_status == 'Accepted' %}aria-current="page"{% endif %} aria-label="Filter by accepted applications: {{ accepted }}">
         <strong>{{ accepted }}</strong>
         <span>Accepted</span>
       </a>
-      <a class="stat" href="?status=Rejected" aria-label="Filter by rejected applications: {{ rejected }}">
+      <a class="stat" href="?status=Rejected" {% if selected_status == 'Rejected' %}aria-current="page"{% endif %} aria-label="Filter by rejected applications: {{ rejected }}">
         <strong>{{ rejected }}</strong>
         <span>Rejected</span>
       </a>
     </div>
 
-    <nav aria-label="More application stages" style="margin-bottom:20px;flex-wrap:wrap">
-      <a href="?status=Reviewed">Reviewed</a><a href="?status=Interview+Invitation">Interviews</a><a href="?status=Hired">Hired / final results</a>
+    <nav class="application-stages" aria-label="More application stages">
+      <a href="?status=Reviewed" {% if selected_status == 'Reviewed' %}aria-current="page"{% endif %}>Reviewed</a>
+      <a href="?status=Interview+Invitation" {% if selected_status == 'Interview Invitation' %}aria-current="page"{% endif %}>Interviews</a>
+      <a href="?status=Hired" {% if selected_status == 'Hired' %}aria-current="page"{% endif %}>Hired / final results</a>
     </nav>
+    <form class="application-search" method="get" role="search">
+      {% if selected_status %}<input type="hidden" name="status" value="{{ selected_status }}">{% endif %}
+      <input type="search" name="q" value="{{ query }}" placeholder="Search job title or employer" aria-label="Search my applications">
+      <button type="submit">Search applications</button>
+      {% if query or selected_status %}<a class="button clear" href="{% url 'my_applications' %}">Clear filters</a>{% endif %}
+    </form>
     <p class="muted">{{ page_obj.paginator.count }} matching application{{ page_obj.paginator.count|pluralize }} &middot; Newest first</p>
 
     {% for app in applications %}
       <article class="card" data-application-id="{{ app.id }}">
         <div class="job-head">
           <div>
-            <h2>{{ app.job_title|default:'Job position' }}</h2>
-            <div class="company">{{ app.company_name|default:'Employer' }}</div>
+            <h2 data-user-content>{{ app.job_title|default:'Job position' }}</h2>
+            <div class="company" data-user-content>{{ app.company_name|default:'Employer' }}</div>
           </div>
           <span class="badge {{ app.status|slugify }}">{{ app.status|default:'Application Submitted' }}</span>
         </div>
 
-        <p class="muted">Applied: {% if app.applied_at %}{{ app.applied_at|date:'M j, Y, g:i a' }}{% else %}Date unavailable{% endif %}</p>
-
+        <p class="application-date"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 11h18"/></svg><span>Applied: {% if app.applied_at %}{{ app.applied_at|date:'M j, Y, g:i a' }}{% else %}Date unavailable{% endif %}</span></p>
+        <div class="application-summary" role="status">
+          {% if app.status == 'Accepted' %}<p>Your application has been accepted. Contact the employer to discuss the next steps.</p>
+          {% elif app.status == 'Rejected' %}<p>The employer did not select this application. You can continue exploring other opportunities.</p>
+          {% elif app.status == 'Hired' %}<p>You have been marked hired by the employer.</p>
+          {% elif app.status == 'Interview Invitation' %}<p>You have been invited to an interview. Open the application details for the schedule and location.</p>
+          {% elif app.status == 'Reviewed' %}<p>The employer has reviewed your application. Check back for the next decision.</p>
+          {% elif app.status == 'Shortlisted' %}<p>You have been shortlisted for further consideration. Check back for updates from the employer.</p>
+          {% else %}<p>Your application has been submitted. Check back here for the employer's decision.</p>{% endif %}
+        </div>
+        {% if app.job_id %}<div class="application-card-actions"><a class="button" href="{% url 'job_detail' app.job_id %}">View job post <span aria-hidden="true">&rarr;</span></a></div>{% endif %}
         <details class="details">
           <summary>Application details &amp; actions</summary>
           {% if app.candidate_message %}<p><strong>Employer message:</strong> {{ app.candidate_message }}</p>{% endif %}
           {% if app.status == 'Interview Invitation' %}<p><strong>Interview:</strong> {{ app.interview_at|date:'M j, Y g:i a' }} (Asia/Manila)<br>{{ app.interview_location }}</p>{% endif %}
-          {% if app.status == 'Hired' %}<p>You have been marked hired by the employer.</p>{% endif %}
-          {% if app.status_history %}<h3>Status history</h3><ul>{% for event in app.status_history %}<li>{{ event.at|date:'M j, Y g:i a' }} ? {{ event.status }}{% if event.note %}: {{ event.note }}{% endif %}</li>{% endfor %}</ul>{% endif %}
-          {% if app.status == 'Accepted' %}
-            <p>Your application has been accepted. Contact the employer to discuss the next steps.</p>
-          {% elif app.status == 'Rejected' %}
-            <p>The employer did not select this application. You can continue exploring other opportunities.</p>
-          {% elif app.status == 'Shortlisted' %}
-            <p>You have been shortlisted for further consideration. Check back for updates from the employer.</p>
-          {% else %}
-            <p>Your application has been submitted. Check back here for the employer's decision.</p>
-          {% endif %}
-          <p>Employer contact: {{ app.employer_email|default:'Not provided' }}</p>
-          <p class="muted">Deleting removes this application from both your list and the employer's applicant list.</p>
+          {% if app.status_history %}<h3>Status history</h3><ul class="application-history">{% for event in app.status_history %}<li>{{ event.at|date:'M j, Y g:i a' }} &middot; {{ event.status }}{% if event.note %}: {{ event.note }}{% endif %}</li>{% endfor %}</ul>{% endif %}
+          <p class="application-contact">Employer contact: {{ app.employer_email|default:'Not provided' }}</p>
+          <div class="application-delete"><p class="muted">Deleting removes this application from both your list and the employer's applicant list.</p>
           
           <form class="delete-application" method="post" action="{% url 'delete_application' app.id %}">
             {% csrf_token %}
             <button type="submit" class="danger" aria-label="Delete application for {{ app.job_title|default:'this job' }}">Delete application</button>
-          </form>
+          </form></div>
         </details>
       </article>
     {% empty %}
@@ -176,7 +198,7 @@
   <script>
     document.querySelectorAll('.delete-application').forEach(form => {
       form.addEventListener('submit', event => {
-        if (!window.confirm('Delete this application? It will also be removed from the employer’s applicant list.')) {
+        if (!window.confirm('Delete this application? This also removes it from the list seen by the employer.')) {
           event.preventDefault();
         }
       });

@@ -370,6 +370,8 @@ def my_applications(request):
     total = len(applications)
     query = request.GET.get('q', '').strip()
     selected_status = request.GET.get('status', '')
+    if selected_status not in statuses:
+        selected_status = ''
     if query:
         applications = [app for app in applications if query.lower() in
                         ((app.get('job_title') or '') + ' ' + (app.get('company_name') or '')).lower()]
