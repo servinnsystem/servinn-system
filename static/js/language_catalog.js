@@ -333,4 +333,25 @@ Retention|Tagal ng pag-iimbak|Kalawigon sang pagtipig
 Your choices|Iyong mga pagpipilian|Imo mga mapilian
 Contact and requests|Pakikipag-ugnayan at mga kahilingan|Pagpakig-angot kag mga pangabay
 Your dashboard|Iyong dashboard|Imo dashboard
+
+Refresh report|I-refresh ang ulat|I-refresh ang report
+Total applications|Kabuuang aplikasyon|Kabilugan sang mga aplikasyon
+All recorded applications|Lahat ng naitalang aplikasyon|Tanan nga narekord nga mga aplikasyon
+Awaiting review|Naghihintay ng pagsusuri|Nagahulat sang pagrepaso
+Accepted or hired|Tinanggap o kinuha sa trabaho|Ginbaton ukon ginkuha sa trabaho
+Positive employer decisions|Mga positibong desisyon ng employer|Mga positibo nga desisyon sang employer
+Current rejection decisions|Mga kasalukuyang pagtanggi|Mga kasamtangan nga pagsikway
+Application status breakdown|Bilang ng aplikasyon ayon sa kalagayan|Kadamuon sang aplikasyon suno sa kahimtangan
+Current status of all recorded applications.|Kasalukuyang kalagayan ng lahat ng naitalang aplikasyon.|Kasamtangan nga kahimtangan sang tanan nga narekord nga aplikasyon.
+No application activity yet|Wala pang aktibidad sa aplikasyon|Wala pa sing aktibidad sa aplikasyon
+Status totals will appear when job seekers submit applications.|Makikita ang mga bilang kapag nagsumite ang mga aplikante.|Makita ang mga kadamuon kon magpasa sang aplikasyon ang mga nagapangita sang trabaho.
+Application records|Mga tala ng aplikasyon|Mga rekord sang aplikasyon
+Job, company or applicant|Trabaho, kompanya o aplikante|Trabaho, kompanya ukon aplikante
+Job / employer|Trabaho / employer|Trabaho / employer
+Applicant|Aplikante|Aplikante
+Submitted|Isinumite|Ginpasa
+No matching applications|Walang tumutugmang aplikasyon|Wala sing nagakaangay nga aplikasyon
+No applications to display|Walang maipapakitang aplikasyon|Wala sing aplikasyon nga ipakita
+Try a different search or status filter.|Subukan ang ibang paghahanap o filter ng kalagayan.|Tilawi ang iban nga pagpangita ukon filter sang kahimtangan.
+Submitted applications will appear here automatically.|Awtomatikong lalabas dito ang mga isinumiteng aplikasyon.|Awtomatiko nga makita diri ang ginpasa nga mga aplikasyon.
 `;

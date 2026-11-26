@@ -184,25 +184,48 @@ def manage_users(request):
 
 @role_required(allowed_roles=['admin'])
 def system_reports(request):
-    """Generates analytics reports on cross-matching performance and placement activity."""
-    apps_ref = db.collection('applications').stream()
-    apps_list = [a.to_dict() for a in apps_ref]
-
+    """Summarize recorded application outcomes and browse matching applications."""
+    from collections import Counter
+    from datetime import datetime
+    apps_list = [dict(document.to_dict(), id=document.id)
+                 for document in db.collection('applications').stream()]
+    statuses = ['Application Submitted', 'Reviewed', 'Shortlisted', 'Interview Invitation', 'Accepted', 'Hired', 'Rejected']
+    counts = Counter(app.get('status') or 'Not specified' for app in apps_list)
     total_apps = len(apps_list)
-    shortlisted = sum(1 for a in apps_list if a.get('status') == 'Shortlisted')
-    accepted = sum(1 for a in apps_list if a.get('status') == 'Accepted')
-    rejected = sum(1 for a in apps_list if a.get('status') == 'Rejected')
-
-    placement_rate = round((accepted / total_apps * 100), 2) if total_apps > 0 else 0.0
-
+    accepted = counts['Accepted']
+    hired = counts['Hired']
+    breakdown = [{'label': label, 'count': counts[label],
+                  'percent': round(counts[label] / total_apps * 100, 1) if total_apps else 0}
+                 for label in statuses]
+    other = total_apps - sum(counts[label] for label in statuses)
+    if other:
+        breakdown.append({'label': 'Other / not specified', 'count': other,
+                          'percent': round(other / total_apps * 100, 1)})
+    selected_status = request.GET.get('status', '')
+    if selected_status not in statuses:
+        selected_status = ''
+    query = request.GET.get('q', '').strip()
+    matching = [app for app in apps_list
+                if (not selected_status or app.get('status') == selected_status)
+                and (not query or query.casefold() in ' '.join(str(app.get(field) or '')
+                    for field in ('job_title', 'company_name', 'applicant_name')).casefold())]
+    def submitted_timestamp(app):
+        value = app.get('applied_at')
+        return value.timestamp() if isinstance(value, datetime) else 0
+    matching.sort(key=submitted_timestamp, reverse=True)
     context = {
-        'total_apps': total_apps,
-        'shortlisted': shortlisted,
-        'accepted': accepted,
-        'rejected': rejected,
-        'placement_rate': placement_rate
+        'total_apps': total_apps, 'shortlisted': counts['Shortlisted'],
+        'accepted': accepted, 'hired': hired, 'rejected': counts['Rejected'],
+        'placement_rate': round((accepted + hired) / total_apps * 100, 1) if total_apps else 0.0,
+        'awaiting_review': counts['Application Submitted'], 'breakdown': breakdown,
+        'applications': Paginator(matching, 10).get_page(request.GET.get('page')),
+        'query': query, 'selected_status': selected_status, 'status_options': statuses,
+        'refreshed_at': timezone.now(),
     }
-    return render(request, 'admin_panel/system_reports.html', context)
+    response = render(request, 'admin_panel/system_reports.html', context)
+    response['Cache-Control'] = 'private, no-store'
+    return response
+
 
 
 @role_required(allowed_roles=['admin'])
