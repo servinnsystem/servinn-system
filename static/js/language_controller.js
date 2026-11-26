@@ -2,11 +2,8 @@
   'use strict';
   const picker = document.getElementById('language-picker');
   if (!picker || window.servinnLanguages) return;
-  const codes = ['en', 'tl', 'hil', 'ceb', 'ilo', 'war'];
-  const names = {en: 'English', tl: 'Filipino (Tagalog)', hil: 'Hiligaynon (Ilonggo)',
-    ceb: 'Cebuano (Bisaya)', war: 'Waray-Waray', ilo: 'Ilocano', pam: 'Kapampangan',
-    pag: 'Pangasinan', bik: 'Bikol', akl: 'Aklanon', krj: 'Kinaray-a', tsg: 'Tausug',
-    mrw: 'Maranao', mdh: 'Maguindanaon'};
+  const codes = ['en', 'tl', 'hil'];
+  const names = {en: 'English', tl: 'Filipino (Tagalog)', hil: 'Hiligaynon (Ilonggo)'};
   const normalize = text => text.replace(/\s+/g, ' ').trim();
   const key = text => normalize(text).toLocaleLowerCase('en');
   const dictionary = new Map();
@@ -18,7 +15,7 @@
   }
   for (const row of (window.servinnLanguageCatalog || '').trim().split('\n')) {
     const values = row.split('|');
-    if (values.length === 6) add(values[0], values);
+    if (values.length === 3) add(values[0], values);
   }
   const aliases = {'Sign In': 'Sign in', 'Sign Out': 'Sign out', 'Find Jobs': 'Find jobs',
     'Saved Jobs': 'Saved jobs', 'My Applications': 'My applications',
@@ -34,6 +31,19 @@
       if (index <= 0 && key(original) === key(values[0])) return original;
       return values[index] || values[0];
     }
+    // Keep decorative arrows while translating the label they accompany.
+    const arrow = original.match(/^(.*?)(\s*[→←↓↻])$/u);
+    if (arrow && dictionary.has(key(arrow[1]))) return translate(arrow[1], language) + arrow[2];
+    const leadingArrow = original.match(/^([←→]\s*)(.+)$/u);
+    if (leadingArrow && dictionary.has(key(leadingArrow[2]))) return leadingArrow[1] + translate(leadingArrow[2], language);
+    const opportunities = original.match(/^(\d+) available opportunities$/i);
+    if (opportunities) return `${opportunities[1]} ${translate('available opportunities', language)}`;
+    const step = original.match(/^Step (\d+) of (\d+): (.+)$/);
+    if (step) return `${translate('Step', language)} ${step[1]} ${translate('of', language)} ${step[2]}: ${translate(step[3], language)}`;
+    const minimumPay = original.match(/^From (₱[\d,.]+)$/);
+    if (minimumPay) return `${translate('From', language)} ${minimumPay[1]}`;
+    const years = original.match(/^(\d+)\+ years$/);
+    if (years) return `${years[1]}+ ${translate('years', language)}`;
     const applications = original.match(/^(\d+) applications$/);
     if (applications) return `${applications[1]} ${translate('Applications', language).toLowerCase()}`;
     return original;

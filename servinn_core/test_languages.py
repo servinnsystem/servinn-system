@@ -30,8 +30,17 @@ class LanguageInputs(HTMLParser):
 
 
 class LanguagePageTests(SimpleTestCase):
-    codes = {'en', 'tl', 'hil', 'ceb', 'war', 'ilo', 'pam', 'pag',
-             'bik', 'akl', 'krj', 'tsg', 'mrw', 'mdh'}
+    codes = {'en', 'tl', 'hil'}
+
+    def test_catalog_contains_three_nonempty_language_columns(self):
+        source = (settings.BASE_DIR / 'static/js/language_catalog.js').read_text(encoding='utf-8')
+        rows = source.split('`', 2)[1].strip().splitlines()
+        for row in rows:
+            if row.strip():
+                with self.subTest(english=row.split('|')[0]):
+                    values = row.split('|')
+                    self.assertEqual(len(values), 3)
+                    self.assertTrue(all(value.strip() for value in values))
 
     def test_all_full_page_layouts_include_shared_language_controls(self):
         roots = [settings.BASE_DIR / 'templates'] + [
@@ -66,6 +75,6 @@ class LanguagePageTests(SimpleTestCase):
                 self.assertEqual(parser.pickers, 1)
                 self.assertEqual(len(parser.ids), len(set(parser.ids)), 'Page contains duplicate HTML IDs.')
                 self.assertEqual(set(parser.codes), self.codes)
-                self.assertEqual(len(parser.codes), 14)
+                self.assertEqual(len(parser.codes), 3)
                 self.assertEqual(html.count('/static/js/language_controller.js'), 1)
-                self.assertIn('English fallback', html)
+                self.assertNotIn('English fallback', html)
