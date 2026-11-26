@@ -126,14 +126,23 @@ def dashboard(request):
     experience = request.GET.get('experience', '')
     saved_only = request.GET.get('saved') == '1'
     hide_applied = request.GET.get('hide_applied') == '1'
+    def numeric_value(value):
+        from math import isfinite
+        if isinstance(value, bool):
+            return -1
+        try:
+            number = float(value)
+            return number if isfinite(number) and number >= 0 else -1
+        except (TypeError, ValueError, OverflowError):
+            return -1
     if selected_types and '' not in selected_types:
         recommended_matches = [job for job in recommended_matches if job.get('job_type') in selected_types]
     if salary_min in ('5000', '10000', '20000', '35000', '50000', '75000'):
-        recommended_matches = [job for job in recommended_matches if isinstance(job.get('salary_amount'), (int, float)) and job['salary_amount'] >= int(salary_min)]
+        recommended_matches = [job for job in recommended_matches if numeric_value(job.get('salary_amount')) >= int(salary_min)]
     if pay_period in ('Hourly', 'Daily', 'Monthly'):
         recommended_matches = [job for job in recommended_matches if job.get('pay_period') == pay_period]
     if experience in ('0', '1', '3', '5'):
-        recommended_matches = [job for job in recommended_matches if isinstance(job.get('experience_years'), (int, float)) and (job['experience_years'] == 0 if experience == '0' else job['experience_years'] >= int(experience))]
+        recommended_matches = [job for job in recommended_matches if (numeric_value(job.get('experience_years')) == 0 if experience == '0' else numeric_value(job.get('experience_years')) >= int(experience))]
     if saved_only:
         recommended_matches = [job for job in recommended_matches if job['id'] in saved_job_ids]
     if hide_applied:

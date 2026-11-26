@@ -104,6 +104,24 @@
     .compatibility-score{background:#e6f6eb;color:#187c40;border-radius:20px;padding:5px 10px;font-size:11px;white-space:nowrap}
     .compatibility-track{height:7px;background:#e5ece7;border-radius:20px;overflow:hidden}
     .compatibility-fill{height:100%;width:0;background:#22a552;border-radius:inherit}
+
+  .job-filters{padding:18px;border-radius:16px}
+  .filter-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#315a46}.filter-heading h2{margin:0;font-size:15px}
+  .job-filters .filter-hint{font-size:11px;line-height:1.7;color:#718278;margin:10px 0 18px}
+  .job-filters summary{font-size:12px;font-weight:700;cursor:pointer;padding:5px 0;color:#315a46}
+  .job-filters details{padding-bottom:14px;margin-bottom:14px}
+  .job-filters label{min-height:38px;padding:8px;border:1px solid transparent;border-radius:8px;margin:4px 0;cursor:pointer;line-height:1.5;transition:background .15s}
+  .job-filters label:hover{background:#f0f5ea}
+  .job-filters label:has(input:checked){background:#edf4e4;border-color:#d3e1c8;color:#315a46;font-weight:600}
+  .job-filters input{width:15px;height:15px;margin:0;accent-color:#315a46;flex-shrink:0}
+  .job-filters small{display:block;line-height:1.7;margin:8px 0;color:#718278;font-size:10px}
+  .filter-actions{display:grid;gap:9px;margin-top:18px}
+  .filter-apply{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;min-height:44px;padding:12px;border:1px solid #315a46;border-radius:9px;background:#315a46;color:white;font:600 12px 'Segoe UI',sans-serif;cursor:pointer}
+  .filter-apply:hover{background:#234a3b}
+  .filter-reset{display:block;text-align:center;padding:10px;min-height:40px;border:1px solid #d7e2d2;border-radius:9px;color:#315a46;background:#f8fbf4;text-decoration:none;font-size:11px}
+  .filter-reset:hover{background:#eaf1e2}
+  .job-filters :focus-visible{outline:3px solid #83a66d;outline-offset:3px}
+  @media(prefers-reduced-motion:reduce){.job-filters label{transition:none}}
 </style>
 </head>
 <body>
@@ -191,11 +209,13 @@
 
     <div class="layout">
       <aside class="job-filters" aria-label="Filter jobs">
-        <h2>Filter opportunities</h2>
-        <details open><summary>Salary</summary><label><input form="job-search-form" type="radio" name="salary_min" value="" {% if not salary_min %}checked{% endif %}> Any</label>{% for amount in salary_options %}<label><input form="job-search-form" type="radio" name="salary_min" value="{{ amount }}" {% if salary_min == amount %}checked{% endif %}> From &#8369;{{ amount }}</label>{% endfor %}<small>Amount per selected pay period.</small></details>
+        <div class="filter-heading"><h2>Filter opportunities</h2><span aria-hidden="true">&#9776;</span></div>
+        <p class="filter-hint">Choose your preferences, then apply filters.</p>
+        <details open><summary>Salary</summary><label><input form="job-search-form" type="radio" name="salary_min" value="" {% if not salary_min %}checked{% endif %}> Any</label>{% for amount in salary_options %}<label><input form="job-search-form" type="radio" name="salary_min" value="{{ amount }}" {% if salary_min == amount %}checked{% endif %}> From &#8369;{{ amount }}</label>{% endfor %}<small>Minimum pay per selected period. Amounts are not converted between periods.</small></details>
         <details open><summary>Pay period</summary><label><input form="job-search-form" type="radio" name="pay_period" value="" {% if not pay_period %}checked{% endif %}> Any</label>{% for period in period_options %}<label><input form="job-search-form" type="radio" name="pay_period" value="{{ period }}" {% if pay_period == period %}checked{% endif %}> {{ period }}</label>{% endfor %}</details>
-        <details open><summary>Work experience</summary><label><input form="job-search-form" type="radio" name="experience" value="" {% if not experience %}checked{% endif %}> Any experience</label>{% for years in experience_options %}<label><input form="job-search-form" type="radio" name="experience" value="{{ years }}" {% if experience == years %}checked{% endif %}> {% if years == '0' %}No experience{% else %}{{ years }}+ years{% endif %}</label>{% endfor %}</details>
+        <details open><summary>Required experience</summary><label><input form="job-search-form" type="radio" name="experience" value="" {% if not experience %}checked{% endif %}> Any experience</label>{% for years in experience_options %}<label><input form="job-search-form" type="radio" name="experience" value="{{ years }}" {% if experience == years %}checked{% endif %}> {% if years == '0' %}No experience{% else %}{{ years }}+ years{% endif %}</label>{% endfor %}</details>
         <details open><summary>Job type</summary><small>Leave unchecked for any type.</small>{% for type in job_types %}<label><input form="job-search-form" type="checkbox" name="job_type" value="{{ type }}" {% if type in selected_types %}checked{% endif %}> {{ type }}</label>{% endfor %}</details>
+        <div class="filter-actions"><button class="filter-apply" type="submit" form="job-search-form">Apply filters <span aria-hidden="true">&rarr;</span></button><a class="filter-reset" href="{% url 'jobseeker_dashboard' %}">Reset all filters</a></div>
       </aside>
       <section aria-label="Job listings">
         <div class="feed-title">
