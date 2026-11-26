@@ -5,6 +5,22 @@
 <title>Applicant Data Privacy Policy | SERVINN</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f2f6f3;color:#203e34;font:15px/1.8 'Segoe UI',sans-serif}a{color:#315a46;text-underline-offset:3px}header{border-bottom:1px solid #dde7df;background:#fff;padding:20px max(20px,calc((100% - 1100px)/2));display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}.brand{display:flex;align-items:center;color:#203e34;font-size:25px;font-weight:800;text-decoration:none}header nav{display:flex;gap:20px;flex-wrap:wrap;font-size:13px}main{max-width:1100px;margin:40px auto;padding:0 22px 50px}.eyebrow{font-size:11px;letter-spacing:1.8px;text-transform:uppercase;color:#607c6b}h1{font-size:clamp(28px,5vw,42px);line-height:1.25;letter-spacing:-1px;margin:12px 0}h2{font-size:21px;line-height:1.5;margin:0 0 12px}h3{font-size:16px}.lead{max-width:770px;color:#60776b}.policy-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:26px;align-items:start;margin-top:28px}.policy-nav{position:sticky;top:20px;background:white;border:1px solid #dfe8e1;border-radius:14px;padding:20px}.policy-nav strong{display:block;margin-bottom:12px}.policy-nav a{display:block;margin:9px 0;font-size:13px}.policy-content section{padding:26px;margin-bottom:18px;border:1px solid #dfe8e1;background:#fff;border-radius:14px;scroll-margin-top:20px}.summary{padding:23px;border-left:4px solid #8daa51;border-radius:10px;background:#ecf3df}.summary p{margin:0}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:13px 10px;text-align:left;vertical-align:top;border-bottom:1px solid #e4ece6}th{color:#315a46;background:#f3f7ef}td:first-child{font-weight:600;width:35%}.table-scroll{overflow:auto}ul{padding-left:22px}li{margin:8px 0}.policy-meta{font-size:12px;color:#687e70}.policy-action{display:inline-block;padding:10px 16px;background:#315a46;color:white;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px}.policy-action:hover{background:#234a3b}footer{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;max-width:1100px;padding:20px 22px 35px;margin:auto;border-top:1px solid #dfe8e1;font-size:12px}a:focus-visible{outline:3px solid #8aa953;outline-offset:4px}@media(max-width:750px){.policy-layout{grid-template-columns:1fr}.policy-nav{position:static}.policy-nav a{display:inline-block;margin:6px 12px 6px 0}.policy-content section{padding:20px}main{margin-top:24px}}
+/* Button-style navigation with clear hover and keyboard states. */
+html{scroll-behavior:smooth}
+header nav{gap:10px}
+header nav a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 18px;border:1px solid #d5e2d8;border-radius:10px;background:#f5f9f4;color:#315a46;text-decoration:none;font-weight:600;transition:background .15s,box-shadow .15s}
+header nav a:last-child{background:#315a46;color:#fff;border-color:#315a46}
+header nav a:hover{background:#e6efe5;box-shadow:0 3px 9px #203e3412}
+header nav a:last-child:hover{background:#234a3b}
+.policy-nav{padding:16px}
+.policy-nav strong{padding:4px 10px 12px;margin:0;border-bottom:1px solid #e4ece6}
+.policy-nav a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin:7px 0 0;padding:10px 12px;border:1px solid transparent;border-radius:9px;text-decoration:none;line-height:1.5;transition:background .15s,border-color .15s}
+.policy-nav a::after{content:'\2192';color:#718278}
+.policy-nav a:hover{background:#edf4e8;border-color:#d5e2d8;color:#203e34}
+.policy-content section:target{border-color:#91ad6b;box-shadow:0 0 0 2px #91ad6b26}
+@media(max-width:750px){.policy-nav a{display:flex;margin:7px 0 0}.policy-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 8px}.policy-nav strong{grid-column:1/-1}}
+@media(max-width:420px){.policy-nav{grid-template-columns:1fr}header nav{width:100%}header nav a{flex:1}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}header nav a,.policy-nav a{transition:none}}
 </style></head><body>
 <header><a class="brand" href="{% url 'home' %}">{% include 'includes/brand_logo.html' %}SERVINN</a><nav aria-label="Privacy page navigation"><a href="{% url 'home' %}">Home</a>{% if request.session.user_role == 'job_seeker' %}<a href="{% url 'jobseeker_dashboard' %}">Your dashboard</a>{% else %}<a href="{% url 'login' %}">Sign in</a>{% endif %}</nav></header>
 <main><p class="eyebrow">Your information, explained</p><h1>Applicant Data Privacy Policy</h1>

@@ -3,72 +3,80 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ job.title }} | SERVINN</title>
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/job_detail.css' %}">
 </head>
-<body>
+<body class="job-page">
 <div class="site-language-tools">{% include 'includes/language_picker.html' %}</div>
-    <header class="navbar">
-        <h2>SERVINN | Job Details</h2>
-        <nav>
-            <a href="{% url 'job_search' %}">Back to Search</a>
-            <a href="{% url 'logout' %}">Sign Out</a>
-        </nav>
-    </header>
-
-    <main class="container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-
-        <article class="job-detail-card">
-            <header class="job-detail-header">
-                <h1>{{ job.title }}</h1>
-                <h3>{{ job.company_name }}</h3>
-                {% if request.session.user_role == 'job_seeker' and job.employer_email %}
-                <a href="{% url 'job_employer_profile' job.id %}">View employer profile &rarr;</a>
-                {% endif %}
-                <p class="job-meta">
-                    <span><strong>Location:</strong> {{ job.location }}</span> | 
-                    <span><strong>Category:</strong> {{ job.category }}</span> | 
-                    <span><strong>Employment Type:</strong> {{ job.job_type }}</span>
-                </p>
+<header class="detail-nav">
+    <a class="detail-brand" href="{% url 'home' %}">{% include 'includes/brand_logo.html' %}SERVINN</a>
+    <nav aria-label="Job navigation">
+        {% if request.session.user_role == 'job_seeker' %}<a class="detail-button secondary" href="{% url 'jobseeker_dashboard' %}">&larr; Back to jobs</a>{% else %}<a class="detail-button secondary" href="{% url 'job_search' %}">&larr; Back to search</a>{% endif %}
+        {% if request.session.user_email %}<a class="detail-button quiet" href="{% url 'logout' %}">Sign out</a>{% else %}<a class="detail-button quiet" href="{% url 'login' %}">Sign in</a>{% endif %}
+    </nav>
+</header>
+<main class="detail-container">
+    {% for message in messages %}<div class="alert {{ message.tags }}" role="status">{{ message }}</div>{% endfor %}
+    <div class="detail-eyebrow">YOUR NEXT OPPORTUNITY</div>
+    <div class="detail-layout">
+        <article class="detail-main">
+            <header class="detail-heading">
+                <div class="detail-heading-top"><span class="detail-badge">{{ job.job_type|default:'Employment opportunity' }}</span>{% if job.posted_at %}<span class="detail-date">Posted <time datetime="{{ job.posted_at|date:'c' }}">{{ job.posted_at|date:'M j, Y' }}</time></span>{% endif %}</div>
+                <h1 data-user-content>{{ job.title }}</h1>
+                <p class="detail-location" data-user-content>{{ job.location|default:'Location not provided' }}</p>
+                <dl class="detail-facts">
+                    <div><dt>Category</dt><dd data-user-content>{{ job.category|default:'Not specified' }}</dd></div>
+                    <div><dt>Employment type</dt><dd>{{ job.job_type|default:'Not specified' }}</dd></div>
+                    {% if job.salary_amount %}<div><dt>Compensation</dt><dd>PHP {{ job.salary_amount|floatformat:2 }}{% if job.pay_period %} / {{ job.pay_period }}{% endif %}</dd></div>{% endif %}
+                </dl>
             </header>
-
-            <hr>
-
-            <section class="job-section">
-                <h2>Required Skills</h2>
-                <div class="skills-tags">
-                    {% for skill in job.required_skills %}
-                        <span class="tag">{{ skill }}</span>
-                    {% endfor %}
+            <section class="detail-section" aria-labelledby="skills-heading">
+                <h2 id="skills-heading">Skills for this role</h2>
+                <div class="detail-skills">{% for skill in job.required_skills %}<span data-user-content>{{ skill }}</span>{% empty %}<p>The employer has not listed specific skills.</p>{% endfor %}</div>
+            </section>
+            <section class="detail-section" aria-labelledby="description-heading">
+                <h2 id="description-heading">About the job</h2>
+                <div class="detail-description" data-user-content>{{ job.description|default:'No description provided.'|linebreaks }}</div>
+            </section>
+        </article>
+        <aside class="detail-sidebar" aria-label="Employer and application">
+            <section class="detail-panel">
+                <h2>Your employer</h2>
+                {% if employer_profile %}
+                <div class="detail-employer">
+                    <a class="detail-avatar-link" href="{% url 'job_employer_profile' job.id %}" aria-label="View {{ employer_profile.name }} employer profile">
+                    {% if employer_profile.has_photo %}<img class="detail-avatar" src="{% url 'job_employer_photo' job.id %}" alt="{{ employer_profile.name }}" data-fallback-src="{% static 'images/default-avatar.svg' %}">
+                    {% elif employer_profile.legacy_photo %}<img class="detail-avatar" src="data:image/jpeg;base64,{{ employer_profile.legacy_photo }}" alt="{{ employer_profile.name }}" data-fallback-src="{% static 'images/default-avatar.svg' %}">
+                    {% else %}<img class="detail-avatar" src="{% static 'images/default-avatar.svg' %}" alt="Employer avatar">{% endif %}
+                    </a>
+                    <div><h3 data-user-content>{{ employer_profile.name }}</h3><p data-user-content>{{ employer_profile.company_name }}</p></div>
                 </div>
+                <dl class="detail-contact">
+                    <div><dt>Location</dt><dd data-user-content>{{ employer_profile.location }}</dd></div>
+                    <div><dt>Contact number</dt><dd>{% if employer_profile.phone_link %}<a href="tel:{{ employer_profile.phone_link }}">{{ employer_profile.contact_number }}</a>{% else %}{{ employer_profile.contact_number|default:'Not provided' }}{% endif %}</dd></div>
+                </dl>
+                <a class="detail-button secondary full" href="{% url 'job_employer_profile' job.id %}">View employer profile <span aria-hidden="true">&rarr;</span></a>
+                {% else %}<h3 data-user-content>{{ job.company_name|default:'Employer' }}</h3><p>Sign in as a job seeker to view the employer profile and contact details.</p>{% endif %}
             </section>
-
-            <section class="job-section">
-                <h2>Job Description</h2>
-                <div data-user-content>{{ job.description|linebreaks }}</div>
-            </section>
-
-            <footer class="job-action-footer">
+            <section class="detail-panel apply-panel">
+                <h2>Interested in this role?</h2>
                 {% if request.session.user_role == 'job_seeker' %}
                     {% if already_applied %}
-                        <button class="btn-disabled" disabled>Application Already Submitted</button>
+                        <p class="detail-applied" role="status">Application submitted</p>
+                        <a class="detail-button secondary full" href="{% url 'my_applications' %}">View my applications &rarr;</a>
                     {% else %}
-                        <form method="post" action="{% url 'apply_job' job.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-primary-lg">Submit Application Now</button>
-                        </form>
+                        <p>Review the job details, then send your application to the employer.</p>
+                        <form method="post" action="{% url 'apply_job' job.id %}">{% csrf_token %}<button type="submit" class="detail-button primary full">Apply for this job <span aria-hidden="true">&rarr;</span></button></form>
                     {% endif %}
-                {% else %}
-                    <p class="info-text">Please log in as a Job Seeker to apply for this job posting.</p>
-                {% endif %}
-            </footer>
-        </article>
-    </main>
+                {% elif not request.session.user_email %}
+                    <p>Sign in as a job seeker to apply.</p><a class="detail-button primary full" href="{% url 'login' %}">Sign in to apply &rarr;</a>
+                {% else %}<p>Applications are available to job seeker accounts.</p>{% endif %}
+            </section>
+        </aside>
+    </div>
+</main>
 {% include 'includes/language_scripts.html' %}
 </body>
 </html>

@@ -1,0 +1,47 @@
+.job-page{margin:0;background:#f1f6f2;color:#214438;font-family:'Segoe UI',sans-serif}
+.job-page *{box-sizing:border-box}
+.detail-nav{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:22px max(24px,calc((100% - 1180px)/2));background:#fff;border-bottom:1px solid #dce7df}
+.detail-brand{display:flex;align-items:center;gap:8px;font-size:25px;font-weight:800;text-decoration:none;color:#214438}
+.detail-nav nav{display:flex;gap:10px;flex-wrap:wrap}
+.detail-container{max-width:1230px;margin:38px auto 70px;padding:0 24px}
+.detail-eyebrow{font-size:11px;letter-spacing:2px;color:#61796c;margin-bottom:18px}
+.detail-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:24px;align-items:start}
+.detail-main,.detail-panel{background:#fff;border:1px solid #dce7df;border-radius:18px}
+.detail-heading{padding:32px;border-bottom:1px solid #e5ece7}
+.detail-heading-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.detail-badge{display:inline-block;background:#edf4dd;padding:7px 12px;border-radius:20px;font-size:12px}
+.detail-date{font-size:12px;color:#61796c}
+.detail-heading h1{font-size:38px;line-height:1.15;letter-spacing:-1px;margin:22px 0 12px;overflow-wrap:anywhere}
+.detail-location{color:#61796c;margin:0 0 22px}
+.detail-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:18px;margin:0}
+.detail-facts dt,.detail-contact dt{font-size:12px;color:#61796c;margin-bottom:6px}
+.detail-facts dd,.detail-contact dd{margin:0;font-size:14px;overflow-wrap:anywhere}
+.detail-section{padding:28px 32px}
+.detail-section+.detail-section{border-top:1px solid #e5ece7}
+.detail-section h2,.detail-panel h2{font-size:19px;margin:0 0 18px}
+.detail-skills{display:flex;flex-wrap:wrap;gap:8px}
+.detail-skills span{font-size:13px;padding:8px 12px;border-radius:8px;background:#f1f6f2;color:#315b46;overflow-wrap:anywhere}
+.detail-description{font-size:15px;line-height:1.85;overflow-wrap:anywhere}
+.detail-description p{margin:0 0 16px}
+.detail-sidebar{display:grid;gap:20px}
+.detail-panel{padding:25px}
+.detail-panel p{font-size:14px;color:#61796c;line-height:1.7}
+.detail-employer{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.detail-employer h3{font-size:16px;margin:0 0 5px;overflow-wrap:anywhere}
+.detail-employer p{font-size:12px;margin:0;overflow-wrap:anywhere}
+.detail-avatar-link{flex-shrink:0;border-radius:50%}
+.detail-avatar{display:block;width:65px;height:65px;object-fit:cover;border-radius:50%;background:#edf4dd}
+.detail-contact{display:grid;gap:16px;margin:0 0 24px}
+.detail-contact a{color:#315b46;text-underline-offset:3px}
+.detail-button{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-height:46px;padding:12px 18px;border-radius:10px;border:1px solid transparent;font:600 13px 'Segoe UI',sans-serif;text-decoration:none;cursor:pointer;transition:background .15s,box-shadow .15s}
+.detail-button.primary{background:#315b46;color:#fff}
+.detail-button.primary:hover{background:#214438;box-shadow:0 4px 12px #21443826}
+.detail-button.secondary{border-color:#d4e1d8;background:#f7faf6;color:#315b46}
+.detail-button.secondary:hover{background:#e9f1e9}
+.detail-button.quiet{background:transparent;color:#61796c}
+.detail-button.quiet:hover{background:#f1f6f2}
+.detail-button.full{width:100%}
+.detail-button:focus-visible,.detail-avatar-link:focus-visible,.detail-brand:focus-visible{outline:3px solid #9cba55;outline-offset:4px}
+.detail-applied{padding:12px;border-radius:10px;background:#edf4dd;color:#315b46!important}
+@media(max-width:850px){.detail-layout{grid-template-columns:1fr}.detail-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.detail-nav{padding:16px;align-items:flex-start;flex-direction:column}.detail-container{padding:0 14px;margin-top:24px}.detail-heading,.detail-section,.detail-panel{padding:22px}.detail-heading h1{font-size:30px}.detail-sidebar{grid-template-columns:1fr}.detail-nav nav{width:100%}.detail-nav nav a:first-child{flex:1}}

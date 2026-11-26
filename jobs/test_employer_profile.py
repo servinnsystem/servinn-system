@@ -74,6 +74,15 @@ class EmployerProfileTests(SimpleTestCase):
         self.assertContains(employer_profile(self.request(), 'job-1'), 'tel:+639198765432')
 
     @patch('jobs.views.db')
+    def test_verified_badge_requires_administrator_verified_status(self, db):
+        self.database(db, clearance_status='Verified', verified=True)
+        self.assertContains(employer_profile(self.request(), 'job-1'), 'class="verified-badge"')
+        for status, verified in [('Under Review', False), ('Rejected', False), ('Under Review', True), ('Verified', False)]:
+            with self.subTest(status=status, verified=verified):
+                self.database(db, clearance_status=status, verified=verified)
+                self.assertNotContains(employer_profile(self.request(), 'job-1'), 'class="verified-badge"')
+
+    @patch('jobs.views.db')
     def test_missing_information_has_honest_fallback(self, db):
         self.database(db, business_phone='', contact_number='', location='')
         response = employer_profile(self.request(), 'job-1')

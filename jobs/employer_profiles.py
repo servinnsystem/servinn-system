@@ -17,4 +17,5 @@ def public_employer_profile(employer, job):
         'industry': employer.get('industry') or '',
         'has_photo': bool(employer.get('profile_photo_file')),
         'legacy_photo': employer.get('profile_photo') or '',
+        'is_verified': employer.get('clearance_status') == 'Verified' and employer.get('verified') is True,
     }

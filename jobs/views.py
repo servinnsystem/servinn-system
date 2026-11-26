@@ -138,7 +138,17 @@ def job_detail(request, job_id):
             .where(filter=FieldFilter('applicant_email', '==', user_email)).get()
         already_applied = len(existing_app) > 0
 
-    return render(request, 'jobs/job_detail.html', {
+    employer_profile = None
+    if user_email and request.session.get('user_role') == 'job_seeker' and job_data.get('employer_email'):
+        from .employer_profiles import public_employer_profile
+        employer_doc = db.collection('users').document(job_data['employer_email']).get()
+        employer = employer_doc.to_dict() if employer_doc.exists else {}
+        if employer.get('role') == 'employer':
+            employer_profile = public_employer_profile(employer, job_data)
+    response = render(request, 'jobs/job_detail.html', {
         'job': job_data,
+        'employer_profile': employer_profile,
         'already_applied': already_applied
     })
+    response['Cache-Control'] = 'private, no-store'
+    return response

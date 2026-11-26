@@ -13,6 +13,8 @@
     .avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;background:#edf4e3}h1{font-size:28px;margin:0 0 8px;overflow-wrap:anywhere}
     .muted{color:#718278;line-height:1.8}.details{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:28px 0}.details dt{font-size:12px;color:#718278;margin-bottom:8px}.details dd{margin:0;overflow-wrap:anywhere;font-weight:600}
     .about{border-top:1px solid #e0e8e1;padding-top:20px;line-height:1.8;overflow-wrap:anywhere}h2{font-size:18px}
+    .verification-row{display:flex;justify-content:flex-end;margin-bottom:18px}
+    .verified-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border:1px solid #cce5d4;border-radius:24px;background:#eaf6ed;color:#22613c;font-size:12px;font-weight:700}
     a:focus-visible{outline:3px solid #86a939;outline-offset:4px}@media(max-width:550px){.card{padding:22px}.details{grid-template-columns:1fr}}
   </style>
 </head>
@@ -25,6 +27,9 @@
   <main>
     <p class="muted">Employer profile</p>
     <section class="card">
+      {% if employer_profile.is_verified %}
+      <div class="verification-row"><span class="verified-badge" title="Employer account verified by a SERVINN administrator"><span aria-hidden="true">&#10003;</span> Verified</span></div>
+      {% endif %}
       <div class="intro">
         {% if employer_profile.has_photo %}
           <img class="avatar" src="{% url 'job_employer_photo' job_id %}" alt="Employer profile photo">
