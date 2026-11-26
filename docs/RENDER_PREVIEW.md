@@ -39,6 +39,12 @@ Add the exact HTTPS callback URL to the Google OAuth client's authorized redirec
 
 ## After deployment
 
+### Administrator access on the free preview
+
+The start script runs `ensure_admin` after migrations. In Render Environment, set all three private variables: `SERVINN_ADMIN_USERNAME`, `SERVINN_ADMIN_EMAIL`, and `SERVINN_ADMIN_PASSWORD`. Use a unique strong password of at least 12 characters. Commit and push the startup changes, then redeploy. Sign in at `/portal-admin/login/` with the exact username and password you configured. These variables never belong in GitHub or screenshots.
+
+The command creates the account only if that username is missing. Existing active superusers keep their password and permissions; existing ordinary or inactive accounts are never promoted. Updating the environment password does not reset an account that already exists. Keep the environment variables set so the administrator can be recreated if Render Free replaces the temporary SQLite database. This restores login access only; it does not make sessions, other administrator accounts or uploaded documents persistent.
+
 Open the public site, check CSS and images, view Privacy Policy and test job search. The preview connects to your configured Firestore database, so submitted profile/job changes affect that database. Local administrator accounts are not copied from your PC. A paid hosting plan with persistent storage or external durable replacements is needed before reliable use of administrator accounts and identity uploads. Configure the Brevo HTTPS email backend described above for email on Free.
 
 References:
