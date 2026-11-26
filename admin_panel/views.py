@@ -127,6 +127,7 @@ def update_clearance_status(request, email):
         user_ref = db.collection('users').document(email)
         snapshot = user_ref.get()
         if snapshot.exists and snapshot.to_dict().get('role') in ('job_seeker', 'employer'):
+            previous_profile = snapshot.to_dict()
             user_ref.update({
                 'clearance_status': new_status,
                 'verified': True if new_status == 'Verified' else False,
@@ -135,6 +136,15 @@ def update_clearance_status(request, email):
                 'reviewed_by': request.user.get_username()
             })
             messages.success(request, f"Updated clearance status for {email} to '{new_status}'.")
+            if (new_status in ('Verified', 'Rejected') and previous_profile.get('role') == 'job_seeker'
+                    and previous_profile.get('clearance_status') != new_status):
+                from accounts.profile_notifications import send_profile_decision
+                try:
+                    send_profile_decision(email, previous_profile, admin_notes, new_status)
+                except Exception:
+                    messages.warning(request, 'The review decision was saved, but the email notification could not be sent. Check the email provider settings.')
+                else:
+                    messages.success(request, 'The email provider accepted the profile review notification for delivery.')
 
     return redirect('manage_users')
 
